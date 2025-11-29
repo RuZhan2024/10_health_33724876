@@ -1,48 +1,96 @@
-<%- include('./partials/header', { pageTitle: 'Login' }) %>
+<%- include('../partials/header', { pageTitle: pageTitle || 'My Health Metrics' }) %>
 
-<h2>My Health Metrics</h2>
+<section class="metrics">
+  <h2>My Health Metrics</h2>
 
-<p><a class="btn" href="/metrics/add">Add metric</a></p>
+  <div class="metrics-actions">
+    <a href="/metrics/add" class="btn">Add Metric</a>
+  </div>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Weight (kg)</th>
-      <th>Steps</th>
-      <th>BP (sys/dia)</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
+  <section class="metrics-filters">
+    <h3>Filter</h3>
+    <form method="GET" action="/metrics">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="type">Metric type</label>
+          <select name="type" id="type">
+            <option value="">All types</option>
+            <% metricTypes.forEach(t => { %>
+              <option value="<%= t.id %>" <%= String(filters.type) === String(t.id) ? 'selected' : '' %>>
+                <%= t.name %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="from">From date</label>
+          <input
+            type="date"
+            id="from"
+            name="from"
+            value="<%= filters.from || '' %>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="to">To date</label>
+          <input
+            type="date"
+            id="to"
+            name="to"
+            value="<%= filters.to || '' %>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn">Apply</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <section class="metrics-list">
     <% if (!metrics.length) { %>
-      <tr><td colspan="5">No metrics yet.</td></tr>
+      <p>No metrics found. Try adjusting your filters or
+        <a href="/metrics/add">add a new metric</a>.
+      </p>
     <% } else { %>
-      <% metrics.forEach(m => { %>
-        <tr>
-          <td><%= m.date.toISOString().slice(0, 10) %></td>
-          <td><%= m.weight_kg || '-' %></td>
-          <td><%= m.steps || '-' %></td>
-          <td>
-            <% if (m.bp_systolic && m.bp_diastolic) { %>
-              <%= m.bp_systolic %>/<%= m.bp_diastolic %>
-            <% } else { %>
-              -
-            <% } %>
-          </td>
-          <td>
-            <a href="/metrics/<%= m.id %>">View</a> |
-            <a href="/metrics/<%= m.id %>/edit">Edit</a> |
-            <form action="/metrics/<%= m.id %>/delete" method="post" class="inline-form"
-                  onsubmit="return confirm('Delete this metric?');">
-              <button type="submit">Delete</button>
-            </form>
-          </td>
-        </tr>
-      <% }) %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Metric</th>
+            <th>Value</th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% metrics.forEach(m => { %>
+            <tr>
+              <td><%= m.metric_date_str %></td>
+              <td><%= m.metric_type_name %></td>
+              <td><%= m.value %> <%= m.unit %></td>
+              <td><%= m.notes || '' %></td>
+              <td>
+                <a href="/metrics/<%= m.id %>/edit">Edit</a>
+                <form
+                  action="/metrics/<%= m.id %>/delete"
+                  method="POST"
+                  style="display:inline"
+                  onsubmit="return confirm('Delete this metric?');"
+                >
+                  <button type="submit" class="link-button">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
     <% } %>
-  </tbody>
-</table>
+  </section>
+</section>
 
-
-<%- include('./partials/footer') %>
+<%- include('../partials/footer') %>
