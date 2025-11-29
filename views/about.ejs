@@ -1,9 +1,20 @@
-<%- include('./partials/header', { pageTitle: 'Login' }) %>
+<%- include('./partials/header', { pageTitle: pageTitle }) %>
 
-<h2>About Guardian Health Tracker</h2>
-<p>
-  This app helps you log your workouts and health metrics so you can
-  understand your training habits and progress over time.
-</p>
+<section class="about">
+  <h2>About this App</h2>
+  <p>
+    This small web application lets you record your workouts and health metrics,
+    including weight, blood pressure, heart rate, steps, and sleep.
+  </p>
+  <p>
+    It is built for a university lab to demonstrate:
+  </p>
+  <ul>
+    <li>User authentication with hashed passwords (bcrypt)</li>
+    <li>Role-based access (user/admin)</li>
+    <li>Form validation and server-side input checks</li>
+    <li>Clean Express + MySQL application structure</li>
+  </ul>
+</section>
 
 <%- include('./partials/footer') %>

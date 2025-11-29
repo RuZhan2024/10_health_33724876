@@ -1,24 +1,22 @@
-<%- include('./partials/header', { pageTitle: 'Login' }) %>
+<%- include('./partials/header', { pageTitle: pageTitle }) %>
 
-<section class="hero">
-  <h2>Track your workouts and health in one place</h2>
-  <p>Log your exercise, monitor your metrics, and see your weekly progress.</p>
+<section class="home">
+  <h2>Welcome to the Health App</h2>
 
   <% if (!currentUser) { %>
-    <a class="btn" href="/login">Get started</a>
+    <p>
+      Track your workouts and health metrics in one place.
+      Please <a href="/auth/register">create an account</a> or
+      <a href="/auth/login">log in</a> to get started.
+    </p>
   <% } else { %>
-    <a class="btn" href="/dashboard">View my dashboard</a>
+    <p>Hello, <strong><%= currentUser.username %></strong>!</p>
+    <p>
+      Go to your <a href="/dashboard">Dashboard</a> to see your recent activity,
+      or log a new <a href="/workouts">workout</a> or
+      <a href="/metrics">health metric</a>.
+    </p>
   <% } %>
 </section>
 
-<% if (stats) { %>
-<section class="panel">
-  <h3>Your last 7 days</h3>
-  <ul>
-    <li>Workouts: <strong><%= stats.workout_count %></strong></li>
-    <li>Total minutes: <strong><%= stats.total_minutes %></strong></li>
-  </ul>
-</section>
-<% } %>
 <%- include('./partials/footer') %>
-

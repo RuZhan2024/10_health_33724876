@@ -1,189 +1,371 @@
 // routes/workouts.js
 const express = require('express');
-const db = require('../db');
+const { body, validationResult } = require('express-validator');
+const pool = require('../db');
 const { requireLogin } = require('./_middleware');
 
 const router = express.Router();
 
-// list with pagination
-router.get('/', requireLogin, async (req, res, next) => {
+function formatDate(date) {
+  if (!date) return '';
+  if (typeof date === 'string') return date.slice(0, 10);
+  return date.toISOString().slice(0, 10);
+}
+
+/**
+ * GET /workouts
+ * List workouts for current user, with optional filters.
+ */
+router.get('/', requireLogin, async (req, res) => {
   const userId = req.session.user.id;
-  const page = parseInt(req.query.page || '1', 10);
-  const pageSize = 10;
-  const offset = (page - 1) * pageSize;
+  const typeFilter = req.query.type || '';
+  const fromDate = req.query.from || '';
+  const toDate = req.query.to || '';
 
   try {
-    const [[{ count }]] = await db.query(
-      'SELECT COUNT(*) AS count FROM workouts WHERE user_id = ?',
-      [userId]
+    // Load workout types for filter dropdown
+    const [workoutTypes] = await pool.query(
+      'SELECT id, name FROM workout_types ORDER BY name ASC'
     );
 
-    const [rows] = await db.query(
-      `SELECT * FROM workouts
-       WHERE user_id = ?
-       ORDER BY date DESC, id DESC
-       LIMIT ? OFFSET ?`,
-      [userId, pageSize, offset]
+    const whereClauses = ['w.user_id = ?'];
+    const params = [userId];
+
+    if (typeFilter) {
+      whereClauses.push('w.workout_type_id = ?');
+      params.push(typeFilter);
+    }
+    if (fromDate) {
+      whereClauses.push('w.workout_date >= ?');
+      params.push(fromDate);
+    }
+    if (toDate) {
+      whereClauses.push('w.workout_date <= ?');
+      params.push(toDate);
+    }
+
+    const whereSql = whereClauses.length
+      ? 'WHERE ' + whereClauses.join(' AND ')
+      : '';
+
+    const [rows] = await pool.query(
+      `
+      SELECT w.id,
+             w.workout_date,
+             w.duration_minutes,
+             w.intensity,
+             w.notes,
+             wt.name AS workout_type_name
+      FROM workouts w
+      JOIN workout_types wt ON w.workout_type_id = wt.id
+      ${whereSql}
+      ORDER BY w.workout_date DESC, w.created_at DESC
+      `,
+      params
     );
 
-    const totalPages = Math.ceil(count / pageSize);
+    const workouts = rows.map(w => ({
+      ...w,
+      workout_date_str: formatDate(w.workout_date)
+    }));
 
     res.render('workouts/list', {
       pageTitle: 'My Workouts',
-      workouts: rows,
-      page,
-      totalPages,
+      workoutTypes,
+      workouts,
+      filters: {
+        type: typeFilter,
+        from: fromDate,
+        to: toDate
+      }
     });
   } catch (err) {
-    next(err);
+    console.error(err);
+    res.status(500).render('error_500');
   }
 });
 
-// add form
-router.get('/add', requireLogin, (req, res) => {
-  res.render('workouts/form', {
-    pageTitle: 'Add Workout',
-    errors: [],
-    values: { date: new Date().toISOString().slice(0, 10) },
-    formAction: '/workouts/add',
-    submitLabel: 'Add Workout',
-  });
-});
+/**
+ * GET /workouts/add
+ * Show form to add a new workout.
+ */
+router.get('/add', requireLogin, async (req, res) => {
+  try {
+    const [workoutTypes] = await pool.query(
+      'SELECT id, name FROM workout_types ORDER BY name ASC'
+    );
 
-// add submit
-router.post('/add', requireLogin, async (req, res, next) => {
-  const userId = req.session.user.id;
-  const { date, type, duration_min, intensity, calories, notes } = req.body;
-
-  const errors = [];
-  if (!date) errors.push('Date is required.');
-  if (!type) errors.push('Type is required.');
-  if (!duration_min || isNaN(duration_min) || duration_min <= 0) {
-    errors.push('Duration must be a positive number.');
-  }
-
-  if (errors.length > 0) {
-    return res.render('workouts/form', {
+    res.render('workouts/form', {
       pageTitle: 'Add Workout',
-      errors,
-      values: req.body,
+      formTitle: 'Add Workout',
       formAction: '/workouts/add',
-      submitLabel: 'Add Workout',
+      workoutTypes,
+      workout: {
+        workout_date: '',
+        workout_type_id: '',
+        duration_minutes: '',
+        intensity: 'medium',
+        notes: ''
+      },
+      errors: {}
     });
-  }
-
-  try {
-    await db.query(
-      `INSERT INTO workouts
-         (user_id, date, type, duration_min, intensity, calories, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [userId, date, type, duration_min, intensity || 1, calories || null, notes || null]
-    );
-    req.session.flash = { type: 'success', message: 'Workout added.' };
-    res.redirect('/workouts');
   } catch (err) {
-    next(err);
+    console.error(err);
+    res.status(500).render('error_500');
   }
 });
 
-// detail
-router.get('/:id', requireLogin, async (req, res, next) => {
-  const userId = req.session.user.id;
-  const id = req.params.id;
+/**
+ * POST /workouts/add
+ * Handle create workout.
+ */
+router.post(
+  '/add',
+  requireLogin,
+  [
+    body('workout_date')
+      .trim()
+      .notEmpty()
+      .withMessage('Please enter a date.'),
+    body('workout_type_id')
+      .trim()
+      .notEmpty()
+      .withMessage('Please select a workout type.'),
+    body('duration_minutes')
+      .trim()
+      .notEmpty()
+      .withMessage('Please enter a duration.')
+      .isInt({ min: 1 })
+      .withMessage('Duration must be a positive number of minutes.'),
+    body('intensity')
+      .trim()
+      .isIn(['low', 'medium', 'high'])
+      .withMessage('Please choose a valid intensity.')
+  ],
+  async (req, res) => {
+    const userId = req.session.user.id;
+    const errors = validationResult(req);
+    const { workout_date, workout_type_id, duration_minutes, intensity, notes } =
+      req.body;
 
-  try {
-    const [rows] = await db.query(
-      'SELECT * FROM workouts WHERE id = ? AND user_id = ?',
-      [id, userId]
-    );
-    const workout = rows[0];
-    if (!workout) {
-      return res.status(404).render('error_404', { pageTitle: 'Not found' });
+    const workoutForForm = {
+      workout_date,
+      workout_type_id,
+      duration_minutes,
+      intensity: intensity || 'medium',
+      notes
+    };
+
+    try {
+      const [workoutTypes] = await pool.query(
+        'SELECT id, name FROM workout_types ORDER BY name ASC'
+      );
+
+      if (!errors.isEmpty()) {
+        return res.status(422).render('workouts/form', {
+          pageTitle: 'Add Workout',
+          formTitle: 'Add Workout',
+          formAction: '/workouts/add',
+          workoutTypes,
+          workout: workoutForForm,
+          errors: errors.mapped()
+        });
+      }
+
+      await pool.query(
+        `
+        INSERT INTO workouts
+          (user_id, workout_type_id, workout_date, duration_minutes, intensity, notes)
+        VALUES (?, ?, ?, ?, ?, ?)
+        `,
+        [
+          userId,
+          workout_type_id,
+          workout_date,
+          duration_minutes,
+          intensity,
+          notes || null
+        ]
+      );
+
+      req.flash('success', 'Workout added successfully.');
+      res.redirect('/workouts');
+    } catch (err) {
+      console.error(err);
+      res.status(500).render('error_500');
     }
-    res.render('workouts/detail', { pageTitle: 'Workout Details', workout });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
-// edit form
-router.get('/:id/edit', requireLogin, async (req, res, next) => {
+/**
+ * GET /workouts/:id/edit
+ * Show edit form for an existing workout (owned by the current user).
+ */
+router.get('/:id/edit', requireLogin, async (req, res) => {
   const userId = req.session.user.id;
-  const id = req.params.id;
+  const workoutId = req.params.id;
 
   try {
-    const [rows] = await db.query(
-      'SELECT * FROM workouts WHERE id = ? AND user_id = ?',
-      [id, userId]
+    const [rows] = await pool.query(
+      `
+      SELECT id, workout_date, workout_type_id, duration_minutes, intensity, notes
+      FROM workouts
+      WHERE id = ? AND user_id = ?
+      LIMIT 1
+      `,
+      [workoutId, userId]
     );
-    const workout = rows[0];
-    if (!workout) {
-      return res.status(404).render('error_404', { pageTitle: 'Not found' });
+
+    if (rows.length === 0) {
+      return res.status(404).render('error_404');
     }
+
+    const workoutRow = rows[0];
+
+    const [workoutTypes] = await pool.query(
+      'SELECT id, name FROM workout_types ORDER BY name ASC'
+    );
+
+    const workoutForForm = {
+      id: workoutRow.id,
+      workout_date: formatDate(workoutRow.workout_date),
+      workout_type_id: String(workoutRow.workout_type_id),
+      duration_minutes: workoutRow.duration_minutes,
+      intensity: workoutRow.intensity,
+      notes: workoutRow.notes || ''
+    };
 
     res.render('workouts/form', {
       pageTitle: 'Edit Workout',
-      errors: [],
-      values: workout,
-      formAction: `/workouts/${id}/edit`,
-      submitLabel: 'Save changes',
+      formTitle: 'Edit Workout',
+      formAction: `/workouts/${workoutId}/edit`,
+      workoutTypes,
+      workout: workoutForForm,
+      errors: {}
     });
   } catch (err) {
-    next(err);
+    console.error(err);
+    res.status(500).render('error_500');
   }
 });
 
-// edit submit
-router.post('/:id/edit', requireLogin, async (req, res, next) => {
+/**
+ * POST /workouts/:id/edit
+ * Handle update for an existing workout.
+ */
+router.post(
+  '/:id/edit',
+  requireLogin,
+  [
+    body('workout_date')
+      .trim()
+      .notEmpty()
+      .withMessage('Please enter a date.'),
+    body('workout_type_id')
+      .trim()
+      .notEmpty()
+      .withMessage('Please select a workout type.'),
+    body('duration_minutes')
+      .trim()
+      .notEmpty()
+      .withMessage('Please enter a duration.')
+      .isInt({ min: 1 })
+      .withMessage('Duration must be a positive number of minutes.'),
+    body('intensity')
+      .trim()
+      .isIn(['low', 'medium', 'high'])
+      .withMessage('Please choose a valid intensity.')
+  ],
+  async (req, res) => {
+    const userId = req.session.user.id;
+    const workoutId = req.params.id;
+    const errors = validationResult(req);
+    const { workout_date, workout_type_id, duration_minutes, intensity, notes } =
+      req.body;
+
+    const workoutForForm = {
+      id: workoutId,
+      workout_date,
+      workout_type_id,
+      duration_minutes,
+      intensity: intensity || 'medium',
+      notes
+    };
+
+    try {
+      const [workoutTypes] = await pool.query(
+        'SELECT id, name FROM workout_types ORDER BY name ASC'
+      );
+
+      if (!errors.isEmpty()) {
+        return res.status(422).render('workouts/form', {
+          pageTitle: 'Edit Workout',
+          formTitle: 'Edit Workout',
+          formAction: `/workouts/${workoutId}/edit`,
+          workoutTypes,
+          workout: workoutForForm,
+          errors: errors.mapped()
+        });
+      }
+
+      const [result] = await pool.query(
+        `
+        UPDATE workouts
+        SET workout_date = ?,
+            workout_type_id = ?,
+            duration_minutes = ?,
+            intensity = ?,
+            notes = ?
+        WHERE id = ? AND user_id = ?
+        `,
+        [
+          workout_date,
+          workout_type_id,
+          duration_minutes,
+          intensity,
+          notes || null,
+          workoutId,
+          userId
+        ]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).render('error_404');
+      }
+
+      req.flash('success', 'Workout updated successfully.');
+      res.redirect('/workouts');
+    } catch (err) {
+      console.error(err);
+      res.status(500).render('error_500');
+    }
+  }
+);
+
+/**
+ * POST /workouts/:id/delete
+ * Delete a workout owned by the current user.
+ */
+router.post('/:id/delete', requireLogin, async (req, res) => {
   const userId = req.session.user.id;
-  const id = req.params.id;
-  const { date, type, duration_min, intensity, calories, notes } = req.body;
-
-  const errors = [];
-  if (!date) errors.push('Date is required.');
-  if (!type) errors.push('Type is required.');
-  if (!duration_min || isNaN(duration_min) || duration_min <= 0) {
-    errors.push('Duration must be a positive number.');
-  }
-
-  if (errors.length > 0) {
-    return res.render('workouts/form', {
-      pageTitle: 'Edit Workout',
-      errors,
-      values: req.body,
-      formAction: `/workouts/${id}/edit`,
-      submitLabel: 'Save changes',
-    });
-  }
+  const workoutId = req.params.id;
 
   try {
-    await db.query(
-      `UPDATE workouts
-       SET date = ?, type = ?, duration_min = ?, intensity = ?, calories = ?, notes = ?
-       WHERE id = ? AND user_id = ?`,
-      [date, type, duration_min, intensity || 1, calories || null, notes || null, id, userId]
-    );
-    req.session.flash = { type: 'success', message: 'Workout updated.' };
-    res.redirect('/workouts');
-  } catch (err) {
-    next(err);
-  }
-});
-
-// delete
-router.post('/:id/delete', requireLogin, async (req, res, next) => {
-  const userId = req.session.user.id;
-  const id = req.params.id;
-
-  try {
-    await db.query(
+    const [result] = await pool.query(
       'DELETE FROM workouts WHERE id = ? AND user_id = ?',
-      [id, userId]
+      [workoutId, userId]
     );
-    req.session.flash = { type: 'success', message: 'Workout deleted.' };
+
+    if (result.affectedRows > 0) {
+      req.flash('success', 'Workout deleted.');
+    } else {
+      req.flash('error', 'Workout not found or not authorised.');
+    }
+
     res.redirect('/workouts');
   } catch (err) {
-    next(err);
+    console.error(err);
+    res.status(500).render('error_500');
   }
 });
 

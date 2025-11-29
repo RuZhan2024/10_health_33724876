@@ -1,55 +1,98 @@
-<%- include('./partials/header', { pageTitle: 'Login' }) %>
+<%- include('../partials/header', { pageTitle: pageTitle || 'My Workouts' }) %>
 
-<h2>My Workouts</h2>
+<section class="workouts">
+  <h2>My Workouts</h2>
 
-<p><a class="btn" href="/workouts/add">Add workout</a></p>
+  <div class="workouts-actions">
+    <a href="/workouts/add" class="btn">Add Workout</a>
+  </div>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Type</th>
-      <th>Duration (min)</th>
-      <th>Intensity</th>
-      <th>Calories</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
+  <section class="workouts-filters">
+    <h3>Filter</h3>
+    <form method="GET" action="/workouts">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="type">Workout type</label>
+          <select name="type" id="type">
+            <option value="">All types</option>
+            <% workoutTypes.forEach(t => { %>
+              <option value="<%= t.id %>" <%= String(filters.type) === String(t.id) ? 'selected' : '' %>>
+                <%= t.name %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="from">From date</label>
+          <input
+            type="date"
+            id="from"
+            name="from"
+            value="<%= filters.from || '' %>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="to">To date</label>
+          <input
+            type="date"
+            id="to"
+            name="to"
+            value="<%= filters.to || '' %>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn">Apply</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <section class="workouts-list">
     <% if (!workouts.length) { %>
-      <tr><td colspan="6">No workouts yet.</td></tr>
+      <p>No workouts found. Try adjusting your filters or
+        <a href="/workouts/add">add a new workout</a>.
+      </p>
     <% } else { %>
-      <% workouts.forEach(w => { %>
-        <tr>
-          <td><%= w.date.toISOString().slice(0, 10) %></td>
-          <td><%= w.type %></td>
-          <td><%= w.duration_min %></td>
-          <td><%= w.intensity %></td>
-          <td><%= w.calories || '-' %></td>
-          <td>
-            <a href="/workouts/<%= w.id %>">View</a> |
-            <a href="/workouts/<%= w.id %>/edit">Edit</a> |
-            <form action="/workouts/<%= w.id %>/delete" method="post" class="inline-form"
-                  onsubmit="return confirm('Delete this workout?');">
-              <button type="submit">Delete</button>
-            </form>
-          </td>
-        </tr>
-      <% }) %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Duration (min)</th>
+            <th>Intensity</th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% workouts.forEach(w => { %>
+            <tr>
+              <td><%= w.workout_date_str %></td>
+              <td><%= w.workout_type_name %></td>
+              <td><%= w.duration_minutes %></td>
+              <td><%= w.intensity %></td>
+              <td><%= w.notes || '' %></td>
+              <td>
+                <a href="/workouts/<%= w.id %>/edit">Edit</a>
+                <form
+                  action="/workouts/<%= w.id %>/delete"
+                  method="POST"
+                  style="display:inline"
+                  onsubmit="return confirm('Delete this workout?');"
+                >
+                  <button type="submit" class="link-button">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
     <% } %>
-  </tbody>
-</table>
+  </section>
+</section>
 
-<% if (totalPages > 1) { %>
-  <nav class="pagination">
-    <% for (let p = 1; p <= totalPages; p++) { %>
-      <% if (p === page) { %>
-        <span class="page current"><%= p %></span>
-      <% } else { %>
-        <a class="page" href="/workouts?page=<%= p %>"><%= p %></a>
-      <% } %>
-    <% } %>
-  </nav>
-<% } %>
-<%- include('./partials/footer') %>
-
+<%- include('../partials/footer') %>

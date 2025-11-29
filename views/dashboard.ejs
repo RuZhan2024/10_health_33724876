@@ -1,22 +1,82 @@
-<%- include('./partials/header', { pageTitle: 'Login' }) %>
+<%- include('./partials/header', { pageTitle: pageTitle }) %>
 
-<h2>Dashboard</h2>
+<section class="dashboard">
+  <h2>Dashboard</h2>
 
-<section class="panel">
-  <h3>Your last 7 days (workouts)</h3>
-  <ul>
-    <li>Workouts: <strong><%= weekWorkouts.workout_count %></strong></li>
-    <li>Total minutes: <strong><%= weekWorkouts.total_minutes %></strong></li>
-    <li>Average intensity: <strong><%= weekWorkouts.avg_intensity.toFixed(1) %></strong></li>
-  </ul>
+  <p>Welcome back, <strong><%= currentUser.username %></strong>.</p>
+
+  <section class="dashboard-stats">
+    <h3>Your recent activity</h3>
+    <ul>
+      <li>Workouts in last 7 days: <strong><%= stats.workoutsLast7Count %></strong> (total <%= stats.workoutsLast7Minutes %> minutes)</li>
+      <li>Workouts in last 30 days: <strong><%= stats.workoutsLast30Count %></strong> (total <%= stats.workoutsLast30Minutes %> minutes)</li>
+      <li>Total health metric entries: <strong><%= stats.metricsCount %></strong></li>
+    </ul>
+  </section>
+
+  <section class="dashboard-recent">
+    <div class="dashboard-column">
+      <h3>Recent workouts</h3>
+
+      <% if (recentWorkouts.length === 0) { %>
+        <p>No workouts recorded yet. <a href="/workouts/add">Add your first workout</a>.</p>
+      <% } else { %>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Duration (min)</th>
+              <th>Intensity</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% recentWorkouts.forEach(w => { %>
+              <tr>
+                <td><%= w.workout_date.toISOString().slice(0, 10) %></td>
+                <td><%= w.workout_type_name %></td>
+                <td><%= w.duration_minutes %></td>
+                <td><%= w.intensity %></td>
+                <td><%= w.notes || '' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <p><a href="/workouts">View all workouts</a></p>
+      <% } %>
+    </div>
+
+    <div class="dashboard-column">
+      <h3>Recent health metrics</h3>
+
+      <% if (recentMetrics.length === 0) { %>
+        <p>No metrics recorded yet. <a href="/metrics/add">Add your first metric</a>.</p>
+      <% } else { %>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Metric</th>
+              <th>Value</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% recentMetrics.forEach(m => { %>
+              <tr>
+                <td><%= m.metric_date.toISOString().slice(0, 10) %></td>
+                <td><%= m.metric_type_name %></td>
+                <td><%= m.value %> <%= m.unit %></td>
+                <td><%= m.notes || '' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <p><a href="/metrics">View all metrics</a></p>
+      <% } %>
+    </div>
+  </section>
 </section>
 
-<section class="panel">
-  <h3>Your last 7 days (metrics)</h3>
-  <ul>
-    <li>Average weight: <strong><%= weekMetrics.avg_weight.toFixed(1) %> kg</strong></li>
-    <li>Average steps: <strong><%= Math.round(weekMetrics.avg_steps) %></strong></li>
-  </ul>
-</section>
 <%- include('./partials/footer') %>
-

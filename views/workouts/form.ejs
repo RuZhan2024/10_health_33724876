@@ -1,52 +1,75 @@
-<%- include('./partials/header', { pageTitle: 'Login' }) %>
+<%- include('../partials/header', { pageTitle: pageTitle || formTitle }) %>
 
-<h2><%= title %></h2>
+<section class="workouts-form">
+  <h2><%= formTitle %></h2>
 
-<% if (errors && errors.length) { %>
-  <ul class="errors">
-    <% errors.forEach(e => { %>
-      <li><%= e %></li>
-    <% }) %>
-  </ul>
-<% } %>
+  <form action="<%= formAction %>" method="POST">
+    <div class="form-group">
+      <label for="workout_date">Date</label>
+      <input
+        type="date"
+        id="workout_date"
+        name="workout_date"
+        value="<%= workout.workout_date || '' %>"
+      />
+      <% if (errors.workout_date) { %>
+        <div class="error"><%= errors.workout_date.msg %></div>
+      <% } %>
+    </div>
 
-<form action="<%= formAction %>" method="post" class="form">
-  <label>
-    Date
-    <input type="date" name="date" value="<%= values.date ? values.date.toISOString ? values.date.toISOString().slice(0,10) : values.date : '' %>">
-  </label>
+    <div class="form-group">
+      <label for="workout_type_id">Workout type</label>
+      <select id="workout_type_id" name="workout_type_id">
+        <option value="">Select a type</option>
+        <% workoutTypes.forEach(t => { %>
+          <option
+            value="<%= t.id %>"
+            <%= String(workout.workout_type_id) === String(t.id) ? 'selected' : '' %>
+          >
+            <%= t.name %>
+          </option>
+        <% }) %>
+      </select>
+      <% if (errors.workout_type_id) { %>
+        <div class="error"><%= errors.workout_type_id.msg %></div>
+      <% } %>
+    </div>
 
-  <label>
-    Type
-    <select name="type">
-      <% const types = ['Run','Walk','Gym','Yoga','Cycling','Other']; %>
-      <% types.forEach(t => { %>
-        <option value="<%= t %>" <%= values.type === t ? 'selected' : '' %>><%= t %></option>
-      <% }) %>
-    </select>
-  </label>
+    <div class="form-group">
+      <label for="duration_minutes">Duration (minutes)</label>
+      <input
+        type="number"
+        id="duration_minutes"
+        name="duration_minutes"
+        min="1"
+        value="<%= workout.duration_minutes %>"
+      />
+      <% if (errors.duration_minutes) { %>
+        <div class="error"><%= errors.duration_minutes.msg %></div>
+      <% } %>
+    </div>
 
-  <label>
-    Duration (minutes)
-    <input type="number" name="duration_min" min="1" value="<%= values.duration_min || '' %>">
-  </label>
+    <div class="form-group">
+      <label for="intensity">Intensity</label>
+      <select id="intensity" name="intensity">
+        <option value="low" <%= workout.intensity === 'low' ? 'selected' : '' %>>Low</option>
+        <option value="medium" <%= workout.intensity === 'medium' ? 'selected' : '' %>>Medium</option>
+        <option value="high" <%= workout.intensity === 'high' ? 'selected' : '' %>>High</option>
+      </select>
+      <% if (errors.intensity) { %>
+        <div class="error"><%= errors.intensity.msg %></div>
+      <% } %>
+    </div>
 
-  <label>
-    Intensity (1–5)
-    <input type="number" name="intensity" min="1" max="5" value="<%= values.intensity || 3 %>">
-  </label>
+    <div class="form-group">
+      <label for="notes">Notes (optional)</label>
+      <textarea id="notes" name="notes" rows="3"><%= workout.notes || '' %></textarea>
+    </div>
 
-  <label>
-    Calories (optional)
-    <input type="number" name="calories" min="0" value="<%= values.calories || '' %>">
-  </label>
+    <button type="submit" class="btn">
+      Save
+    </button>
+  </form>
+</section>
 
-  <label>
-    Notes
-    <textarea name="notes"><%= values.notes || '' %></textarea>
-  </label>
-
-  <button type="submit" class="btn"><%= submitLabel %></button>
-</form>
-<%- include('./partials/footer') %>
-
+<%- include('../partials/footer') %>
