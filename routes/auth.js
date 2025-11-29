@@ -201,15 +201,17 @@ router.post(
  * GET /auth/logout
  */
 router.get('/logout', requireLogin, (req, res) => {
-  req.session.destroy(err => {
+  req.session.regenerate(err => {
     if (err) {
       console.error(err);
       return res.status(500).render('error_500');
     }
-    res.clearCookie('health_app_sid');
+
+    // Now we have a fresh empty session:
     req.flash('success', 'You have been logged out.');
     res.redirect('/');
   });
 });
+
 
 module.exports = router;

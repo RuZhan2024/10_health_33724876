@@ -11,15 +11,9 @@ USE health_app;
 -- ---------------------------------------------------
 INSERT INTO users (username, email, password_hash, role, is_active, created_at, last_login)
 VALUES
-  ('admin', 'admin@example.com',
-   '$2b$10$LkC2/4GAs6bipBTdjX6UaulMHpE6eMRYcqhKyFm7/AL9jkPXNDmjG',
-   'admin', 1, '2025-11-01 09:00:00', '2025-11-24 10:00:00'),
-  ('alice', 'alice@example.com',
-   '$2b$10$hIpElr0QL/IcmD781A//iuRF8wwRj/ZWeC2BIBuwz8.BOz1cEJKFi',
-   'user', 1, '2025-11-02 09:00:00', NULL),
-  ('bob', 'bob@example.com',
-   '$2b$10$m2.BU2g5vK/txZ8j.5u28.7KcamQtbyCuOVto92wypmQYblSb.g/i',
-   'user', 1, '2025-11-03 09:00:00', NULL);
+  ('gold', 'gru001@gold.ac.uk',
+   '$2b$10$XCgr6z1XWPKufo/Qw07XY.Wtv0U/aa.VMfsVYX4CDWDmN08wM.lHW',
+   'admin', 1, '2025-11-10 09:00:00', NULL);
 
 -- After this insert, IDs will typically be:
 -- admin -> id = 1

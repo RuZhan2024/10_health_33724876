@@ -1,29 +1,162 @@
-<%- include('./partials/header', { pageTitle: 'Login' }) %>
+<%- include('./partials/header', { pageTitle: pageTitle || 'Admin Dashboard' }) %>
 
-<h2>Admin Overview</h2>
+<section class="admin-dashboard">
+  <h2>Admin Dashboard</h2>
 
-<ul>
-  <li>Total users: <strong><%= userCount %></strong></li>
-  <li>Total workouts: <strong><%= workoutCount %></strong></li>
-  <li>Total metrics: <strong><%= metricCount %></strong></li>
-</ul>
+  <!-- Site stats -->
+  <section class="admin-stats">
+    <h3>Site overview</h3>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h4>Total users</h4>
+        <p><strong><%= siteStats.total_users %></strong></p>
+      </div>
+      <div class="stat-card">
+        <h4>Admins</h4>
+        <p><strong><%= siteStats.total_admins %></strong></p>
+      </div>
+      <div class="stat-card">
+        <h4>Active users</h4>
+        <p><strong><%= siteStats.active_users %></strong></p>
+      </div>
+      <div class="stat-card">
+        <h4>Total workouts</h4>
+        <p><strong><%= siteStats.total_workouts %></strong></p>
+      </div>
+      <div class="stat-card">
+        <h4>Total metrics</h4>
+        <p><strong><%= siteStats.total_metrics %></strong></p>
+      </div>
+      <div class="stat-card">
+        <h4>Workouts (last 7 days)</h4>
+        <p><strong><%= siteStats.workouts_last7 %></strong></p>
+      </div>
+      <div class="stat-card">
+        <h4>Metrics (last 7 days)</h4>
+        <p><strong><%= siteStats.metrics_last7 %></strong></p>
+      </div>
+    </div>
+  </section>
 
-<h3>Most active users</h3>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Username</th>
-      <th>Workout count</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% topUsers.forEach(u => { %>
-      <tr>
-        <td><%= u.username %></td>
-        <td><%= u.workouts %></td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+  <!-- Users table -->
+  <section class="admin-users">
+    <h3>Users</h3>
+
+    <% if (!users.length) { %>
+      <p>No users found.</p>
+    <% } else { %>
+      <table class="table admin-users-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Active</th>
+            <th>Workouts</th>
+            <th>Metrics</th>
+            <th>Created</th>
+            <th>Last login</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(u => { %>
+            <tr class="<%= u.is_active ? '' : 'user-inactive' %>">
+              <td><%= u.id %></td>
+              <td><%= u.username %></td>
+              <td><%= u.email %></td>
+              <td><%= u.role %></td>
+              <td><%= u.is_active ? 'Yes' : 'No' %></td>
+              <td><%= u.workout_count %></td>
+              <td><%= u.metric_count %></td>
+              <td><%= u.created_at_str %></td>
+              <td><%= u.last_login_str %></td>
+              <td>
+                <!-- Change role -->
+                <form
+                  action="/admin/users/<%= u.id %>/role"
+                  method="POST"
+                  style="display:inline"
+                >
+                  <% if (u.role === 'admin') { %>
+                    <input type="hidden" name="role" value="user" />
+                    <button
+                      type="submit"
+                      class="link-button"
+                      onclick="return confirm('Make this user a normal user?');"
+                      <%= (String(u.id) === String(currentAdminId)) ? 'disabled' : '' %>
+                    >
+                      Make user
+                    </button>
+                  <% } else { %>
+                    <input type="hidden" name="role" value="admin" />
+                    <button
+                      type="submit"
+                      class="link-button"
+                      onclick="return confirm('Make this user an admin?');"
+                    >
+                      Make admin
+                    </button>
+                  <% } %>
+                </form>
+
+                <!-- Toggle active -->
+                <form
+                  action="/admin/users/<%= u.id %>/toggle-active"
+                  method="POST"
+                  style="display:inline"
+                >
+                  <button
+                    type="submit"
+                    class="link-button"
+                    onclick="return confirm('Toggle active status for this user?');"
+                    <%= (String(u.id) === String(currentAdminId)) ? 'disabled' : '' %>
+                  >
+                    <%= u.is_active ? 'Deactivate' : 'Activate' %>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </section>
+
+  <!-- Recent login attempts -->
+  <section class="admin-logins">
+    <h3>Recent login attempts</h3>
+
+    <% if (!recentLogins.length) { %>
+      <p>No login attempts recorded yet.</p>
+    <% } else { %>
+      <table class="table admin-logins-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Username</th>
+            <th>Linked user</th>
+            <th>Success</th>
+            <th>IP</th>
+            <th>User agent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% recentLogins.forEach(l => { %>
+            <tr class="<%= l.success ? 'login-success' : 'login-failure' %>">
+              <td><%= l.attempted_at_str %></td>
+              <td><%= l.username_attempt || '' %></td>
+              <td><%= l.linked_username || '-' %></td>
+              <td><%= l.success ? 'Yes' : 'No' %></td>
+              <td><%= l.ip_address || '' %></td>
+              <td><%= l.user_agent || '' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </section>
+</section>
 
 <%- include('./partials/footer') %>
