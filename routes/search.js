@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get('/search', requireLogin, (req, res) => {
   res.render('search', {
-    title: 'Search Workouts',
+    pageTitle: 'Search Workouts',
     values: {},
   });
 });
@@ -47,7 +47,7 @@ router.get('/search/results', requireLogin, async (req, res, next) => {
     );
 
     res.render('search_results', {
-      title: 'Search Results',
+      pageTitle: 'Search Results',
       workouts: rows,
       count: rows.length,
       values: req.query,

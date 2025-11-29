@@ -1,17 +1,33 @@
-// routes/_middleware.js
+// _middleware.js
+
 function requireLogin(req, res, next) {
-  if (!req.session.user) {
-    req.session.flash = { type: 'error', message: 'Please log in first.' };
-    return res.redirect('/login');
+  if (!req.session || !req.session.user) {
+    req.flash('error', 'You must be logged in to view that page.');
+    return res.redirect('/auth/login');
   }
   next();
 }
 
 function requireAdmin(req, res, next) {
-  if (!req.session.user || req.session.user.role !== 'admin') {
-    return res.status(403).render('error_403', { title: 'Forbidden' });
+  if (!req.session || !req.session.user) {
+    req.flash('error', 'You must be logged in to view that page.');
+    return res.redirect('/auth/login');
+  }
+  if (req.session.user.role !== 'admin') {
+    return res.status(403).render('error_403');
   }
   next();
 }
 
-module.exports = { requireLogin, requireAdmin };
+function attachUserToLocals(req, res, next) {
+  res.locals.currentUser = req.session ? req.session.user : null;
+  res.locals.successMessages = req.flash('success');
+  res.locals.errorMessages = req.flash('error');
+  next();
+}
+
+module.exports = {
+  requireLogin,
+  requireAdmin,
+  attachUserToLocals
+};

@@ -1,4 +1,4 @@
-<%- include('partials/header', { title: 'Dashboard' }) %>
+<%- include('./partials/header', { pageTitle: 'Login' }) %>
 
 <h2>Dashboard</h2>
 
@@ -18,5 +18,5 @@
     <li>Average steps: <strong><%= Math.round(weekMetrics.avg_steps) %></strong></li>
   </ul>
 </section>
+<%- include('./partials/footer') %>
 
-<%- include('partials/footer') %>

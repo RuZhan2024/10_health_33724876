@@ -21,7 +21,7 @@ router.get('/', requireAdmin, async (req, res, next) => {
     );
 
     res.render('admin', {
-      title: 'Admin Overview',
+      pageTitle: 'Admin Overview',
       userCount: userCount.count,
       workoutCount: workoutCount.count,
       metricCount: metricCount.count,

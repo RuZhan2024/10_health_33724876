@@ -18,7 +18,7 @@ router.get('/', requireLogin, async (req, res, next) => {
     );
 
     res.render('metrics/list', {
-      title: 'My Health Metrics',
+      pageTitle: 'My Health Metrics',
       metrics: rows,
     });
   } catch (err) {
@@ -29,7 +29,7 @@ router.get('/', requireLogin, async (req, res, next) => {
 // add form
 router.get('/add', requireLogin, (req, res) => {
   res.render('metrics/form', {
-    title: 'Add Metric',
+    pageTitle: 'Add Metric',
     errors: [],
     values: { date: new Date().toISOString().slice(0, 10) },
     formAction: '/metrics/add',
@@ -47,7 +47,7 @@ router.post('/add', requireLogin, async (req, res, next) => {
 
   if (errors.length > 0) {
     return res.render('metrics/form', {
-      title: 'Add Metric',
+      pageTitle: 'Add Metric',
       errors,
       values: req.body,
       formAction: '/metrics/add',
@@ -89,9 +89,9 @@ router.get('/:id', requireLogin, async (req, res, next) => {
     );
     const metric = rows[0];
     if (!metric) {
-      return res.status(404).render('error_404', { title: 'Not found' });
+      return res.status(404).render('error_404', { pageTitle: 'Not found' });
     }
-    res.render('metrics/detail', { title: 'Metric Details', metric });
+    res.render('metrics/detail', { pageTitle: 'Metric Details', metric });
   } catch (err) {
     next(err);
   }
@@ -109,11 +109,11 @@ router.get('/:id/edit', requireLogin, async (req, res, next) => {
     );
     const metric = rows[0];
     if (!metric) {
-      return res.status(404).render('error_404', { title: 'Not found' });
+      return res.status(404).render('error_404', { pageTitle: 'Not found' });
     }
 
     res.render('metrics/form', {
-      title: 'Edit Metric',
+      pageTitle: 'Edit Metric',
       errors: [],
       values: metric,
       formAction: `/metrics/${id}/edit`,
@@ -135,7 +135,7 @@ router.post('/:id/edit', requireLogin, async (req, res, next) => {
 
   if (errors.length > 0) {
     return res.render('metrics/form', {
-      title: 'Edit Metric',
+      pageTitle: 'Edit Metric',
       errors,
       values: req.body,
       formAction: `/metrics/${id}/edit`,

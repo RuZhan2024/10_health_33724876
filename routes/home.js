@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
   try {
     if (!req.session.user) {
-      return res.render('home', { title: 'Home', stats: null });
+      return res.render('home', { pageTitle: 'Home', stats: null });
     }
 
     const userId = req.session.user.id;
@@ -23,14 +23,14 @@ router.get('/', async (req, res, next) => {
       [userId]
     );
 
-    res.render('home', { title: 'Home', stats: rows[0] });
+    res.render('home', { pageTitle: 'Home', stats: rows[0] });
   } catch (err) {
     next(err);
   }
 });
 
 router.get('/about', (req, res) => {
-  res.render('about', { title: 'About' });
+  res.render('about', { pageTitle: 'About' });
 });
 
 module.exports = router;

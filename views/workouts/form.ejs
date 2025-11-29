@@ -1,4 +1,4 @@
-<%- include('../partials/header', { title }) %>
+<%- include('./partials/header', { pageTitle: 'Login' }) %>
 
 <h2><%= title %></h2>
 
@@ -48,5 +48,5 @@
 
   <button type="submit" class="btn"><%= submitLabel %></button>
 </form>
+<%- include('./partials/footer') %>
 
-<%- include('../partials/footer') %>

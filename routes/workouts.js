@@ -29,7 +29,7 @@ router.get('/', requireLogin, async (req, res, next) => {
     const totalPages = Math.ceil(count / pageSize);
 
     res.render('workouts/list', {
-      title: 'My Workouts',
+      pageTitle: 'My Workouts',
       workouts: rows,
       page,
       totalPages,
@@ -42,7 +42,7 @@ router.get('/', requireLogin, async (req, res, next) => {
 // add form
 router.get('/add', requireLogin, (req, res) => {
   res.render('workouts/form', {
-    title: 'Add Workout',
+    pageTitle: 'Add Workout',
     errors: [],
     values: { date: new Date().toISOString().slice(0, 10) },
     formAction: '/workouts/add',
@@ -64,7 +64,7 @@ router.post('/add', requireLogin, async (req, res, next) => {
 
   if (errors.length > 0) {
     return res.render('workouts/form', {
-      title: 'Add Workout',
+      pageTitle: 'Add Workout',
       errors,
       values: req.body,
       formAction: '/workouts/add',
@@ -98,9 +98,9 @@ router.get('/:id', requireLogin, async (req, res, next) => {
     );
     const workout = rows[0];
     if (!workout) {
-      return res.status(404).render('error_404', { title: 'Not found' });
+      return res.status(404).render('error_404', { pageTitle: 'Not found' });
     }
-    res.render('workouts/detail', { title: 'Workout Details', workout });
+    res.render('workouts/detail', { pageTitle: 'Workout Details', workout });
   } catch (err) {
     next(err);
   }
@@ -118,11 +118,11 @@ router.get('/:id/edit', requireLogin, async (req, res, next) => {
     );
     const workout = rows[0];
     if (!workout) {
-      return res.status(404).render('error_404', { title: 'Not found' });
+      return res.status(404).render('error_404', { pageTitle: 'Not found' });
     }
 
     res.render('workouts/form', {
-      title: 'Edit Workout',
+      pageTitle: 'Edit Workout',
       errors: [],
       values: workout,
       formAction: `/workouts/${id}/edit`,
@@ -148,7 +148,7 @@ router.post('/:id/edit', requireLogin, async (req, res, next) => {
 
   if (errors.length > 0) {
     return res.render('workouts/form', {
-      title: 'Edit Workout',
+      pageTitle: 'Edit Workout',
       errors,
       values: req.body,
       formAction: `/workouts/${id}/edit`,

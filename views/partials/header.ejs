@@ -2,14 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title><%= title %> | Guardian Health Tracker</title>
+  <title><%= pageTitle || 'Health App' %></title>
   <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-<div class="page">
-  <header class="site-header">
-    <h1 class="site-title">Guardian Health Tracker</h1>
-    <%- include('nav') %>
+  <header>
+    <h1>Health App</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <% if (currentUser) { %>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/workouts">Workouts</a>
+        <a href="/metrics">Metrics</a>
+        <a href="/search">Search</a>
+        <% if (currentUser.role === 'admin') { %>
+          <a href="/admin">Admin</a>
+        <% } %>
+        <a href="/auth/logout">Logout (<%= currentUser.username %>)</a>
+      <% } else { %>
+        <a href="/auth/login">Login</a>
+        <a href="/auth/register">Register</a>
+      <% } %>
+    </nav>
   </header>
-  <main class="site-main">
-    <%- include('flash') %>
+
+  <main>
+    <%- include('./_flash'); %>

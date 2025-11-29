@@ -1,14 +1,17 @@
 // db.js
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',           // change to your MySQL user
-  password: 'yourpass',   // change to your MySQL password
-  database: 'guardian_health',
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || 'health_app',
+  password: process.env.DB_PASSWORD || 'qwertyuiop',
+  database: process.env.DB_NAME || 'health_app',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0,
+  queueLimit: 0
 });
 
-module.exports = pool.promise();
+module.exports = pool;
+

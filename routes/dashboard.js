@@ -31,7 +31,7 @@ router.get('/dashboard', requireLogin, async (req, res, next) => {
     );
 
     res.render('dashboard', {
-      title: 'Dashboard',
+      pageTitle: 'Dashboard',
       weekWorkouts,
       weekMetrics,
     });
