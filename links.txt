@@ -1,0 +1,13 @@
+home=http://www.doc.gold.ac.uk/usr/122/
+health_home=http://www.doc.gold.ac.uk/usr/122/
+health_about=http://www.doc.gold.ac.uk/usr/122/about
+health_register=http://www.doc.gold.ac.uk/usr/122/auth/register
+health_login=http://www.doc.gold.ac.uk/usr/122/auth/login
+health_logout=http://www.doc.gold.ac.uk/usr/122/auth/logout
+health_dashboard=http://www.doc.gold.ac.uk/usr/122/dashboard
+health_workouts=http://www.doc.gold.ac.uk/usr/122/workouts
+health_workouts_add=http://www.doc.gold.ac.uk/usr/122/workouts/add
+health_metrics=http://www.doc.gold.ac.uk/usr/122/metrics
+health_metrics_add=http://www.doc.gold.ac.uk/usr/122/metrics/add
+health_search=http://www.doc.gold.ac.uk/usr/122/search
+health_admin=http://www.doc.gold.ac.uk/usr/122/admin
