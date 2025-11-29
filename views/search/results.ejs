@@ -1,0 +1,130 @@
+<%- include('../partials/header', { pageTitle: pageTitle || 'Search Results' }) %>
+
+<section class="search-results-page">
+  <h2>Search Results</h2>
+
+  <section class="search-summary">
+    <h3>Your search</h3>
+    <ul>
+      <li>Scope:
+        <% if (filters.scope === 'workouts') { %>
+          <strong>Workouts only</strong>
+        <% } else if (filters.scope === 'metrics') { %>
+          <strong>Metrics only</strong>
+        <% } else { %>
+          <strong>Workouts &amp; Metrics</strong>
+        <% } %>
+      </li>
+      <li>Keyword:
+        <% if (filters.keyword) { %>
+          "<strong><%= filters.keyword %></strong>"
+        <% } else { %>
+          <em>(none)</em>
+        <% } %>
+      </li>
+      <li>Date range:
+        <% if (filters.from || filters.to) { %>
+          <strong><%= filters.from || 'any' %></strong>
+          –
+          <strong><%= filters.to || 'any' %></strong>
+        <% } else { %>
+          <em>any date</em>
+        <% } %>
+      </li>
+    </ul>
+
+    <p>
+      <a href="/search?scope=<%= filters.scope %>&keyword=<%= encodeURIComponent(filters.keyword || '') %>&from=<%= filters.from || '' %>&to=<%= filters.to || '' %>">
+        Adjust this search
+      </a>
+      or
+      <a href="/search">start a new search</a>.
+    </p>
+  </section>
+
+  <% if ((filters.scope === 'all' || filters.scope === 'workouts') && workouts) { %>
+    <section class="search-section">
+      <h3>Workout results (<%= workouts.length %>)</h3>
+
+      <% if (!workouts.length) { %>
+        <p>No workouts matched your search.</p>
+      <% } else { %>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Duration (min)</th>
+              <th>Intensity</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% workouts.forEach(w => { %>
+              <tr>
+                <td><%= w.workout_date_str %></td>
+                <td><%= w.workout_type_name %></td>
+                <td><%= w.duration_minutes %></td>
+                <td><%= w.intensity %></td>
+                <td><%= w.notes || '' %></td>
+                <td>
+                  <a href="/workouts/<%= w.id %>/edit">Edit</a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </section>
+  <% } %>
+
+  <% if ((filters.scope === 'all' || filters.scope === 'metrics') && metrics) { %>
+    <section class="search-section">
+      <h3>Metric results (<%= metrics.length %>)</h3>
+
+      <% if (!metrics.length) { %>
+        <p>No metrics matched your search.</p>
+      <% } else { %>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Metric</th>
+              <th>Value</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% metrics.forEach(m => { %>
+              <tr>
+                <td><%= m.metric_date_str %></td>
+                <td><%= m.metric_type_name %></td>
+                <td><%= m.value %> <%= m.unit %></td>
+                <td><%= m.notes || '' %></td>
+                <td>
+                  <a href="/metrics/<%= m.id %>/edit">Edit</a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </section>
+  <% } %>
+
+  <% if (
+    (filters.scope === 'workouts' && workouts.length === 0) ||
+    (filters.scope === 'metrics' && metrics.length === 0) ||
+    (filters.scope === 'all' && workouts.length === 0 && metrics.length === 0)
+  ) { %>
+    <section class="search-empty">
+      <p>No results found for this search. You can
+        <a href="/search">try again with different filters</a>.
+      </p>
+    </section>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

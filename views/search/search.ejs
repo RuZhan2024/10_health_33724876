@@ -1,0 +1,81 @@
+<%- include('../partials/header', { pageTitle: pageTitle || 'Search' }) %>
+
+<section class="search-page">
+  <h2>Search your data</h2>
+
+  <p>
+    Search across your workouts and health metrics by keyword and date range.
+  </p>
+
+  <form method="GET" action="/search/results" class="search-form">
+    <div class="form-group">
+      <label>Search in</label>
+      <div class="radio-group">
+        <label>
+          <input
+            type="radio"
+            name="scope"
+            value="all"
+            <%= (!filters.scope || filters.scope === 'all') ? 'checked' : '' %>
+          />
+          Workouts &amp; Metrics
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="scope"
+            value="workouts"
+            <%= filters.scope === 'workouts' ? 'checked' : '' %>
+          />
+          Workouts only
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="scope"
+            value="metrics"
+            <%= filters.scope === 'metrics' ? 'checked' : '' %>
+          />
+          Metrics only
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="keyword">Keyword (type or notes)</label>
+      <input
+        type="text"
+        id="keyword"
+        name="keyword"
+        value="<%= filters.keyword || '' %>"
+        placeholder="e.g. run, weight, yoga"
+      />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="from">From date</label>
+        <input
+          type="date"
+          id="from"
+          name="from"
+          value="<%= filters.from || '' %>"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="to">To date</label>
+        <input
+          type="date"
+          id="to"
+          name="to"
+          value="<%= filters.to || '' %>"
+        />
+      </div>
+    </div>
+
+    <button type="submit" class="btn">Search</button>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>
