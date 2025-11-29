@@ -1,85 +1,98 @@
-
 # 10_health_33724876 – Health Tracker (Express + MySQL)
 
 A small health-tracking web application built with **Node.js**, **Express**, **EJS**, and **MySQL**.
 
 Users can register, log in, and track their **workouts** and **health metrics** (weight, blood pressure, heart rate, steps, sleep, etc.).  
-An **admin panel** provides an overview of users and basic activity statistics.
+An **admin panel** provides an overview of users, simple activity statistics, and recent login attempts.
 
-> This README also documents the **database design** and **route structure** we’ve planned so far, so future work can follow the same structure.
-
----
-
-## 1. Features (planned)
+## 1. Features
 
 ### Core user features
 
-- User registration and login with **hashed passwords**.
-- Role-based access:
+- **User registration & login**  
+  - Passwords stored as **bcrypt hashes**
+  - Validation using `express-validator`
+  - Flash messages for errors/success (`connect-flash`)
+
+- **Role-based access**
   - `user` – normal user
-  - `admin` – admin panel access
-- Personal dashboard:
-  - Recent workouts
-  - Recent health metrics
-  - Simple summary stats
-- Workouts module:
-  - List own workouts
+  - `admin` – access to `/admin` dashboard
+  - New registrations always get `role = 'user'` by default
+
+- **Personal dashboard**
+  - Recent **workouts** and **metrics**
+  - Simple summary stats (totals / last 7 days)
+
+- **Workouts module**
+  - List your own workouts
   - Add / edit / delete workouts
-  - Filter by date range and workout type
-- Metrics module:
-  - List own health metrics (weight, BP, HR, steps, sleep, …)
+  - Filter by **date range** and **workout type**
+
+- **Metrics module**
+  - List your own health metrics (weight, BP, HR, steps, sleep, etc.)
   - Add / edit / delete metrics
-  - Filter by date range and metric type
-- Search:
-  - Search across workouts / metrics with optional filters
-- Admin area:
-  - List all users with basic stats
-  - (Optional) change roles / deactivate users
-- Friendly error pages:
-  - 403 – forbidden
+  - Filter by **date range** and **metric type**
+
+- **Search**
+  - Search across **workouts** and/or **metrics**
+  - Filter by keyword, scope (workouts / metrics / both), and date range
+
+- **Error pages**
+  - 403 – forbidden (e.g. user tries to open `/admin` without admin role)
   - 404 – not found
   - 500 – server error
 
-### Technical features
+### Admin features
 
-- Passwords stored as **bcrypt hashes**.
-- DB credentials managed via **`.env`** (not committed to Git).
-- Separate route modules per feature (home, auth, dashboard, workouts, metrics, search, admin).
-- Shared layout and partials for consistent UI.
-- Optional **login audit** table for recording login attempts (bonus feature).
-
----
+- **Admin dashboard (`/admin`)**
+  - Overall site stats:
+    - Total users / admins / active users
+    - Total workouts & metrics
+    - Workouts and metrics in the last 7 days
+  - Users table:
+    - Username, email, role, active status
+    - Counts of workouts & metrics per user
+    - Created time and last login time
+  - Actions:
+    - Change user role (`user` ↔ `admin`)
+    - Activate / deactivate users (cannot deactivate yourself)
+  - **Login audit**:
+    - Recent login attempts (username, success/failure, IP, user agent, timestamp)
 
 ## 2. Tech stack
 
 - **Backend**
   - Node.js
   - Express
+
 - **Templating**
   - EJS
+
 - **Database**
   - MySQL 8
-  - `mysql2` / `express-mysql-session` for DB + session store
+  - `mysql2` for queries
+  - `express-mysql-session` for session storage
+
 - **Auth / security**
   - `express-session`
   - `bcrypt`
+
 - **Validation & UX**
   - `express-validator`
   - `connect-flash`
+
 - **Config**
   - `dotenv`
 
----
-
-## 3. Project structure (planned)
+## 3. Project structure
 
 ```text
 10_health_33724876/
-├─ index.js                 # Main Express app
-├─ db.js                    # MySQL connection / config
+├─ index.js                 # Main Express app (middleware + routes)
+├─ db.js                    # MySQL connection / session store config
 ├─ _middleware.js           # Auth / role middleware & locals
-├─ create_db.sql            # Create database, tables, (optional) app user
-├─ insert_test_data.sql     # Seed data (users, types, workouts, metrics)
+├─ create_db.sql            # Create database, tables, app user & grants
+├─ insert_test_data.sql     # Seed data (admin user, types, sample data)
 ├─ .env.example             # Example environment variables
 ├─ package.json
 ├─ public/
@@ -93,13 +106,10 @@ An **admin panel** provides an overview of users and basic activity statistics.
 │  ├─ search.js
 │  └─ admin.js
 └─ views/
-   ├─ layout.ejs
    ├─ partials/
-   │  ├─ _head.ejs
-   │  ├─ _header.ejs
-   │  ├─ _nav.ejs
-   │  ├─ _flash.ejs
-   │  └─ _footer.ejs
+   │  ├─ header.ejs         # <head> + navigation + opening <main> + flash
+   │  ├─ footer.ejs         # closing </main> and </body></html>
+   │  └─ _flash.ejs         # flash message partial
    ├─ home.ejs
    ├─ about.ejs
    ├─ error_403.ejs
@@ -115,29 +125,36 @@ An **admin panel** provides an overview of users and basic activity statistics.
    ├─ metrics/
    │  ├─ list.ejs
    │  └─ form.ejs
-   └─ search/
-      ├─ search.ejs
-      └─ results.ejs
+   ├─ search/
+   │  ├─ search.ejs
+   │  └─ results.ejs
+   └─ admin.ejs             # Admin dashboard
 ````
 
----
+All “page” views include:
+
+```ejs
+<%- include('../partials/header', { pageTitle: 'Page Title' }) %>
+
+<!-- page content -->
+
+<%- include('../partials/footer') %>
+```
 
 ## 4. Database design
 
-**Database name:** `health_app` (can be changed, but must stay consistent)
+**Database name:** `health_app`
 
-We use **6 tables**:
+Tables:
 
 1. `users`
 2. `workout_types`
 3. `workouts`
 4. `metric_types`
 5. `metrics`
-6. `login_audit` (optional but implemented in schema and test data)
+6. `login_audit`
 
-### 4.1 Tables (overview)
-
-#### `users`
+### 4.1 `users`
 
 Stores user accounts and roles.
 
@@ -152,17 +169,17 @@ Stores user accounts and roles.
 | created_at    | DATETIME             | Default current timestamp   |
 | last_login    | DATETIME NULL        | Updated on successful login |
 
-#### `workout_types`
+### 4.2 `workout_types`
 
 Lookup table for possible workout types.
 
 | Column      | Type               | Notes                 |
 | ----------- | ------------------ | --------------------- |
 | id          | INT UNSIGNED PK    | Auto-increment        |
-| name        | VARCHAR(50) UNIQUE | E.g. Running, Walking |
+| name        | VARCHAR(50) UNIQUE | e.g. Running, Walking |
 | description | VARCHAR(255) NULL  | Optional description  |
 
-#### `workouts`
+### 4.3 `workouts`
 
 Individual workout sessions per user.
 
@@ -177,20 +194,22 @@ Individual workout sessions per user.
 | notes            | VARCHAR(500) NULL                  | Optional notes            |
 | created_at       | DATETIME                           | Default current timestamp |
 
-Index: `(user_id, workout_date)` for fast per-user queries.
+Index: `(user_id, workout_date)` for faster per-user queries.
 
-#### `metric_types`
+---
+
+### 4.4 `metric_types`
 
 Lookup table for different health metrics.
 
 | Column       | Type               | Notes                       |
 | ------------ | ------------------ | --------------------------- |
 | id           | INT UNSIGNED PK    | Auto-increment              |
-| name         | VARCHAR(50) UNIQUE | E.g. Weight, Blood Pressure |
-| default_unit | VARCHAR(20)        | E.g. kg, mmHg, bpm          |
+| name         | VARCHAR(50) UNIQUE | e.g. Weight, Blood Pressure |
+| default_unit | VARCHAR(20)        | e.g. kg, mmHg, bpm          |
 | description  | VARCHAR(255) NULL  | Optional description        |
 
-#### `metrics`
+### 4.5 `metrics`
 
 Individual health metric entries per user.
 
@@ -207,9 +226,9 @@ Individual health metric entries per user.
 
 Index: `(user_id, metric_date)`.
 
-#### `login_audit` (optional)
+### 4.6 `login_audit`
 
-For logging login attempts – useful for the admin page.
+Logging login attempts (used on the admin dashboard).
 
 | Column           | Type                       | Notes                         |
 | ---------------- | -------------------------- | ----------------------------- |
@@ -221,7 +240,6 @@ For logging login attempts – useful for the admin page.
 | user_agent       | VARCHAR(255) NULL          | Browser / client string       |
 | attempted_at     | DATETIME                   | Default current timestamp     |
 
----
 
 ## 5. Database setup scripts
 
@@ -240,57 +258,34 @@ GRANT SELECT, INSERT, UPDATE, DELETE
 ON health_app.* TO 'health_app'@'localhost';
 ```
 
-### 5.2 `insert_test_data.sql` (summary)
-
-* Uses `health_app` database.
-* Inserts seed data:
-
-**Users**
-
-Plaintext passwords for the marker:
-
-| username | role  | password        |
-| -------- | ----- | --------------- |
-| admin    | admin | `AdminPass123!` |
-| alice    | user  | `AlicePass123!` |
-| bob      | user  | `BobPass123!`   |
-
-Each has a corresponding **bcrypt hash** inserted into `users.password_hash`.
-
-**Workout types**
-
-* Running
-* Walking
-* Cycling
-* Strength Training
-* Yoga
-
-**Sample workouts**
-
-* Several workouts for `alice` and `bob` on different dates, with different types, intensities, and durations.
-
-**Metric types**
-
-* Weight (kg)
-* Blood Pressure (mmHg)
-* Heart Rate (bpm)
-* Steps (steps)
-* Sleep (hours)
-
-**Sample metrics**
-
-* Weight, heart rate, steps, sleep entries for both `alice` and `bob`, spread across dates.
-* Example BP entry stored with value and unit `mmHg`.
-
-**Login audit**
-
-* A few example login audit rows, including successful and failed attempts.
+> In development, the app is configured to connect using this `health_app` MySQL user.
 
 ---
 
+### 5.2 `insert_test_data.sql` (summary)
+
+* Uses the `health_app` database.
+* Inserts:
+
+  * One **admin user** (for marking).
+  * Basic workout types and metric types.
+  * A small number of sample workouts, metrics, and login audit entries for that user.
+
+#### Default admin user
+
+> All other pre-inserted users were removed – only this admin user is created by `insert_test_data.sql`.
+
+| username | role  | email                                         | password |
+| -------- | ----- | --------------------------------------------- | -------- |
+| gold     | admin | [gru001@gold.ac.uk](mailto:gru001@gold.ac.uk) | `smiths` |
+
+The script inserts the **bcrypt hash** for `"smiths"` into `users.password_hash`.
+Markers can also create additional **user** accounts via the registration form.
+
+
 ## 6. Environment variables
 
-A `.env.example` file should look like:
+`.env.example`:
 
 ```bash
 DB_HOST=localhost
@@ -302,15 +297,21 @@ DB_NAME=health_app
 SESSION_SECRET=change_this_in_real_env
 ```
 
-The real `.env` is **not** committed to the repo.
+Steps:
 
----
+1. Copy it to `.env`:
 
-## 7. Route design (planned)
+   ```bash
+   cp .env.example .env
+   ```
 
-### Mounted routes
+2. Adjust values if needed (e.g. different DB user/password, stronger `SESSION_SECRET`).
 
-In `index.js`:
+The `.env` file is **not committed** to the repository.
+
+## 7. Route design
+
+### Mounted routes (in `index.js`)
 
 ```js
 app.use('/', homeRoutes);
@@ -326,51 +327,59 @@ app.use('/admin', adminRoutes);
 
 | Area      | Method | Path                             | Middleware         | Description                                     |
 | --------- | ------ | -------------------------------- | ------------------ | ----------------------------------------------- |
-| Home      | GET    | `/`                              | attachUserToLocals | Landing page (guest vs logged-in vs admin view) |
+| Home      | GET    | `/`                              | attachUserToLocals | Landing page                                    |
 | Home      | GET    | `/about`                         | attachUserToLocals | About page                                      |
 | Auth      | GET    | `/auth/register`                 | attachUserToLocals | Show registration form                          |
-| Auth      | POST   | `/auth/register`                 | attachUserToLocals | Handle registration (validation + bcrypt)       |
+| Auth      | POST   | `/auth/register`                 | attachUserToLocals | Register user (validation + bcrypt)             |
 | Auth      | GET    | `/auth/login`                    | attachUserToLocals | Show login form                                 |
-| Auth      | POST   | `/auth/login`                    | attachUserToLocals | Authenticate, set session, log to login_audit   |
-| Auth      | GET    | `/auth/logout`                   | requireLogin       | Destroy session, redirect                       |
-| Dashboard | GET    | `/dashboard`                     | requireLogin       | Show user’s recent workouts/metrics + stats     |
-| Workouts  | GET    | `/workouts`                      | requireLogin       | List user workouts + filters                    |
+| Auth      | POST   | `/auth/login`                    | attachUserToLocals | Authenticate, set session, log to `login_audit` |
+| Auth      | GET    | `/auth/logout`                   | requireLogin       | Clear session user & redirect to `/`            |
+| Dashboard | GET    | `/dashboard`                     | requireLogin       | User dashboard (recent data + stats)            |
+| Workouts  | GET    | `/workouts`                      | requireLogin       | List workouts + filters                         |
 | Workouts  | GET    | `/workouts/add`                  | requireLogin       | Add workout form                                |
 | Workouts  | POST   | `/workouts/add`                  | requireLogin       | Insert workout                                  |
 | Workouts  | GET    | `/workouts/:id/edit`             | requireLogin       | Edit own workout                                |
 | Workouts  | POST   | `/workouts/:id/edit`             | requireLogin       | Update workout                                  |
 | Workouts  | POST   | `/workouts/:id/delete`           | requireLogin       | Delete workout                                  |
-| Metrics   | GET    | `/metrics`                       | requireLogin       | List user metrics + filters                     |
+| Metrics   | GET    | `/metrics`                       | requireLogin       | List metrics + filters                          |
 | Metrics   | GET    | `/metrics/add`                   | requireLogin       | Add metric form                                 |
 | Metrics   | POST   | `/metrics/add`                   | requireLogin       | Insert metric                                   |
 | Metrics   | GET    | `/metrics/:id/edit`              | requireLogin       | Edit own metric                                 |
 | Metrics   | POST   | `/metrics/:id/edit`              | requireLogin       | Update metric                                   |
 | Metrics   | POST   | `/metrics/:id/delete`            | requireLogin       | Delete metric                                   |
-| Search    | GET    | `/search`                        | requireLogin       | Show search form                                |
-| Search    | GET    | `/search/results`                | requireLogin       | Show workouts/metrics results                   |
-| Admin     | GET    | `/admin`                         | requireAdmin       | Admin dashboard with user list + stats          |
-| Admin     | POST   | `/admin/users/:id/role`          | requireAdmin       | (Optional) Change user role                     |
-| Admin     | POST   | `/admin/users/:id/toggle-active` | requireAdmin       | (Optional) Activate/deactivate user             |
+| Search    | GET    | `/search`                        | requireLogin       | Search form                                     |
+| Search    | GET    | `/search/results`                | requireLogin       | Search results across workouts/metrics          |
+| Admin     | GET    | `/admin`                         | requireAdmin       | Admin dashboard (stats + users + login audit)   |
+| Admin     | POST   | `/admin/users/:id/role`          | requireAdmin       | Change user role                                |
+| Admin     | POST   | `/admin/users/:id/toggle-active` | requireAdmin       | Activate / deactivate user                      |
 
----
 
 ## 8. Middleware
 
-In `_middleware.js`:
+Defined in `_middleware.js`:
 
-* `requireLogin` – redirect unauthenticated users to `/auth/login`.
-* `requireAdmin` – also checks `req.session.user.role === 'admin'`, otherwise 403.
-* `attachUserToLocals` – makes `currentUser` and flash messages available to all views.
+* **`requireLogin`**
 
----
+  * Redirects unauthenticated users to `/auth/login`.
+  * Used on routes that require a logged-in user.
+
+* **`requireAdmin`**
+
+  * Checks that `req.session.user` exists and `role === 'admin'`.
+  * Otherwise responds with **403** (or redirects).
+
+* **`attachUserToLocals`**
+
+  * Makes the current user available as `currentUser` in all views.
+  * Also attaches `success` and `error` flash messages for `_flash.ejs`.
 
 ## 9. Setup & run
 
 ### Prerequisites
 
-* Node.js 18+
-* MySQL 8+
-* A MySQL user with permission to create databases and users (for running `create_db.sql` once).
+* Node.js **18+**
+* MySQL **8+**
+* A MySQL user with permission to run `create_db.sql` and `insert_test_data.sql` once.
 
 ### Steps
 
@@ -389,7 +398,7 @@ In `_middleware.js`:
 
 3. **Create database & app user**
 
-   Log into MySQL as root (or another admin), then:
+   Log into MySQL as root (or another admin), then run:
 
    ```sql
    SOURCE create_db.sql;
@@ -410,10 +419,17 @@ In `_middleware.js`:
    # or: node index.js
    ```
 
-6. **Test logins**
+6. **Log in as admin**
 
-   * Admin: `admin` / `AdminPass123!`
-   * User: `alice` / `AlicePass123!`
-   * User: `bob` / `BobPass123!`
+   Use the pre-seeded admin user:
+
+   * **Username:** `gold`
+   * **Email:** `gru001@gold.ac.uk`
+   * **Password:** `smiths`
+
+   You can then:
+
+   * Access `/admin` to see the admin panel.
+   * Register new normal users through `/auth/register`.
 
 
