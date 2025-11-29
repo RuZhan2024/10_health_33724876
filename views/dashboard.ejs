@@ -1,0 +1,22 @@
+<%- include('partials/header', { title: 'Dashboard' }) %>
+
+<h2>Dashboard</h2>
+
+<section class="panel">
+  <h3>Your last 7 days (workouts)</h3>
+  <ul>
+    <li>Workouts: <strong><%= weekWorkouts.workout_count %></strong></li>
+    <li>Total minutes: <strong><%= weekWorkouts.total_minutes %></strong></li>
+    <li>Average intensity: <strong><%= weekWorkouts.avg_intensity.toFixed(1) %></strong></li>
+  </ul>
+</section>
+
+<section class="panel">
+  <h3>Your last 7 days (metrics)</h3>
+  <ul>
+    <li>Average weight: <strong><%= weekMetrics.avg_weight.toFixed(1) %> kg</strong></li>
+    <li>Average steps: <strong><%= Math.round(weekMetrics.avg_steps) %></strong></li>
+  </ul>
+</section>
+
+<%- include('partials/footer') %>

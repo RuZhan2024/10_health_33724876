@@ -1,0 +1,24 @@
+<%- include('partials/header', { title: 'Home' }) %>
+
+<section class="hero">
+  <h2>Track your workouts and health in one place</h2>
+  <p>Log your exercise, monitor your metrics, and see your weekly progress.</p>
+
+  <% if (!currentUser) { %>
+    <a class="btn" href="/login">Get started</a>
+  <% } else { %>
+    <a class="btn" href="/dashboard">View my dashboard</a>
+  <% } %>
+</section>
+
+<% if (stats) { %>
+<section class="panel">
+  <h3>Your last 7 days</h3>
+  <ul>
+    <li>Workouts: <strong><%= stats.workout_count %></strong></li>
+    <li>Total minutes: <strong><%= stats.total_minutes %></strong></li>
+  </ul>
+</section>
+<% } %>
+
+<%- include('partials/footer') %>

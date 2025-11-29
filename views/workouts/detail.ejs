@@ -1,0 +1,19 @@
+<%- include('../partials/header', { title: 'Workout Details' }) %>
+
+<h2>Workout Details</h2>
+
+<ul class="detail-list">
+  <li><strong>Date:</strong> <%= workout.date.toISOString().slice(0, 10) %></li>
+  <li><strong>Type:</strong> <%= workout.type %></li>
+  <li><strong>Duration:</strong> <%= workout.duration_min %> minutes</li>
+  <li><strong>Intensity:</strong> <%= workout.intensity %></li>
+  <li><strong>Calories:</strong> <%= workout.calories || '-' %></li>
+  <li><strong>Notes:</strong> <%= workout.notes || '-' %></li>
+</ul>
+
+<p>
+  <a href="/workouts/<%= workout.id %>/edit">Edit</a> |
+  <a href="/workouts">Back to list</a>
+</p>
+
+<%- include('../partials/footer') %>

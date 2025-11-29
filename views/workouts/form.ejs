@@ -1,0 +1,52 @@
+<%- include('../partials/header', { title }) %>
+
+<h2><%= title %></h2>
+
+<% if (errors && errors.length) { %>
+  <ul class="errors">
+    <% errors.forEach(e => { %>
+      <li><%= e %></li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<form action="<%= formAction %>" method="post" class="form">
+  <label>
+    Date
+    <input type="date" name="date" value="<%= values.date ? values.date.toISOString ? values.date.toISOString().slice(0,10) : values.date : '' %>">
+  </label>
+
+  <label>
+    Type
+    <select name="type">
+      <% const types = ['Run','Walk','Gym','Yoga','Cycling','Other']; %>
+      <% types.forEach(t => { %>
+        <option value="<%= t %>" <%= values.type === t ? 'selected' : '' %>><%= t %></option>
+      <% }) %>
+    </select>
+  </label>
+
+  <label>
+    Duration (minutes)
+    <input type="number" name="duration_min" min="1" value="<%= values.duration_min || '' %>">
+  </label>
+
+  <label>
+    Intensity (1–5)
+    <input type="number" name="intensity" min="1" max="5" value="<%= values.intensity || 3 %>">
+  </label>
+
+  <label>
+    Calories (optional)
+    <input type="number" name="calories" min="0" value="<%= values.calories || '' %>">
+  </label>
+
+  <label>
+    Notes
+    <textarea name="notes"><%= values.notes || '' %></textarea>
+  </label>
+
+  <button type="submit" class="btn"><%= submitLabel %></button>
+</form>
+
+<%- include('../partials/footer') %>

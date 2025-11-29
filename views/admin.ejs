@@ -1,0 +1,29 @@
+<%- include('partials/header', { title: 'Admin Overview' }) %>
+
+<h2>Admin Overview</h2>
+
+<ul>
+  <li>Total users: <strong><%= userCount %></strong></li>
+  <li>Total workouts: <strong><%= workoutCount %></strong></li>
+  <li>Total metrics: <strong><%= metricCount %></strong></li>
+</ul>
+
+<h3>Most active users</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Workout count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% topUsers.forEach(u => { %>
+      <tr>
+        <td><%= u.username %></td>
+        <td><%= u.workouts %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,87 @@
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f3f4f6;
+  margin: 0;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+.site-header {
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+  padding-bottom: .5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.site-title {
+  margin: 0;
+}
+
+.nav a {
+  margin-right: 1rem;
+  text-decoration: none;
+}
+
+.nav-logout {
+  display: inline-block;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.table th,
+.table td {
+  border: 1px solid #e5e7eb;
+  padding: 0.4rem;
+  text-align: left;
+}
+
+.errors {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  padding: 0.5rem 0.8rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.flash {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 4px;
+}
+
+.flash-success {
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+
+.flash-error {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.inline-form {
+  display: inline;
+}
