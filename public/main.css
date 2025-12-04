@@ -223,6 +223,10 @@ main {
   outline-offset: 2px;
 }
 
+.btn.auth-btn {
+  width: 100%;
+}
+
 /* ============================================
    Forms – Material-ish outlined textfields
    ============================================ */
