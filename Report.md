@@ -8,7 +8,7 @@ The application also includes a search page for querying historical data and an 
 
 ## Architecture
 
-The application follows a classic two-tier web architecture:
+The application follows a classic three-tier web architecture:
 
 - Client tier (browser)
    Users interact via HTML pages rendered with EJS templates and styled with a shared Material Design-inspired main.css. All forms submit data using standard HTTP POST and GET requests, and the same layout/partials are reused across pages (home, dashboard, workouts, metrics, search, admin, and weather).
@@ -170,8 +170,6 @@ The admin view includes:
   - User agent
   - Timestamp
 
-This gives the marker a clear demonstration of role-based access and administration features.
-
 ### Error handling and UX
 
 The app includes custom 403, 404, and 500 views, so users get friendly error messages instead of raw stack traces. Flash messages are consistently used to provide feedback on actions such as login, logout, validation errors, and successful creation or update of records. The layout and main.css provide a clean, modern, Material Design-inspired UI, with cards, elevated surfaces, rounded corners, and responsive layouts that keep the app usable on desktop and smaller screens.
@@ -250,13 +248,3 @@ Several features go beyond the bare minimum requirements and demonstrate more ad
 
 10. Material Design-inspired UI
      The shared main.css stylesheet has been customised to follow Material Design principles: primary and secondary colour palette, elevated surfaces, rounded cards, pill-shaped buttons, clear focus states, and responsive layouts. Tables, forms, flash messages, and navigation elements all share a consistent look and feel. This not only improves the user experience, but also shows attention to front-end design and accessibility within a server-rendered Express and EJS project.
-
-In the report document, example code snippets could be taken from:
-
-- `_middleware.js` (showing requireAdmin)
-- `routes/auth.js` (login logic and login_audit insert)
-- `routes/admin.js` (role and active toggling)
-- `routes/search.js` (search queries)
-- `routes/weather.js` (external API integration and error handling)
-
-These features together demonstrate not only that the application can meet the lab requirements, but also that it uses realistic patterns for security, maintainability, user experience, and integration with external services.
