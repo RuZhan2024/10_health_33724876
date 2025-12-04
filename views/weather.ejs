@@ -1,0 +1,66 @@
+<%- include('./partials/header', { pageTitle: pageTitle || 'Weather' }) %>
+
+<section class="home">
+  <h2>Weather</h2>
+  <p>
+    Check the current weather for a city. This feature uses the OpenWeatherMap API
+    and is included as an extra function in the health tracker.
+  </p>
+
+  <form action="/weather" method="get" style="margin-top: 1rem;">
+    <div class="form-group">
+      <label for="city">City</label>
+      <input
+        type="text"
+        id="city"
+        name="city"
+        value="<%= city || '' %>"
+        placeholder="e.g. London,uk or Paris,fr"
+      >
+    </div>
+    <button type="submit" class="btn">Check weather</button>
+  </form>
+
+  <% if (error) { %>
+    <div class="flash flash-error" style="margin-top: 1rem;">
+      <%= error %>
+    </div>
+  <% } %>
+
+  <% if (weather) { %>
+    <div class="card" style="margin-top: 1.25rem;">
+      <h3 style="margin-top: 0;">
+        Current weather in <%= weather.cityName %><% if (weather.country) { %>, <%= weather.country %><% } %>
+      </h3>
+
+      <p style="margin-top: 0.5rem; font-size: 1.1rem;">
+        <strong><%= Math.round(weather.temp) %>°C</strong>
+        <% if (typeof weather.feelsLike === 'number') { %>
+          (feels like <%= Math.round(weather.feelsLike) %>°C)
+        <% } %>
+        <% if (weather.description) { %>
+          – <%= weather.description %>
+        <% } %>
+      </p>
+
+      <ul style="margin-top: 0.5rem; padding-left: 1.2rem;">
+        <% if (typeof weather.humidity === 'number') { %>
+          <li>Humidity: <%= weather.humidity %>%</li>
+        <% } %>
+        <% if (typeof weather.windSpeed === 'number') { %>
+          <li>Wind speed: <%= weather.windSpeed %> m/s</li>
+        <% } %>
+      </ul>
+    </div>
+  <% } else if (!error && city) { %>
+    <p style="margin-top: 1rem; color: #6b7280;">
+      No weather data available for this city.
+    </p>
+  <% } else { %>
+    <p style="margin-top: 1rem; color: #6b7280;">
+      Enter a city above and click <strong>Check weather</strong> to see the latest conditions.
+    </p>
+  <% } %>
+</section>
+
+<%- include('./partials/footer') %>

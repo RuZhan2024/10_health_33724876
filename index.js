@@ -17,6 +17,7 @@ const workoutsRoutes = require('./routes/workouts');
 const metricsRoutes = require('./routes/metrics');
 const searchRoutes = require('./routes/search');
 const adminRoutes = require('./routes/admin');
+const weatherRoutes = require('./routes/weather');
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.use('/workouts', workoutsRoutes);
 app.use('/metrics', metricsRoutes);
 app.use('/search', searchRoutes);
 app.use('/admin', adminRoutes);
+app.use('/weather', weatherRoutes);
 
 // 404
 app.use((req, res) => {

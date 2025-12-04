@@ -1,30 +1,83 @@
-/* ========== Reset-ish basics ========== */
+
+:root {
+  --md-primary: #1976d2;
+  --md-primary-dark: #0d47a1;
+  --md-primary-light: #e3f2fd;
+  --md-secondary: #ff9800;
+  --md-error: #d32f2f;
+
+  --md-bg: #f5f5f5;
+  --md-surface: #ffffff;
+  --md-surface-alt: #fafafa;
+
+  --md-border: #e0e0e0;
+  --md-divider: #e0e0e0;
+
+  --md-text-primary: #212121;
+  --md-text-secondary: #616161;
+  --md-text-disabled: #9e9e9e;
+
+  --md-radius-small: 4px;
+  --md-radius: 8px;
+  --md-radius-large: 12px;
+
+  --md-elev-1: 0 1px 3px rgba(0, 0, 0, 0.12),
+               0 1px 2px rgba(0, 0, 0, 0.24);
+  --md-elev-2: 0 3px 6px rgba(0, 0, 0, 0.16),
+               0 3px 6px rgba(0, 0, 0, 0.23);
+  --md-elev-3: 0 10px 20px rgba(0, 0, 0, 0.19),
+               0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+/* ============================================
+   Base
+   ============================================ */
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f5f5f7;
-  color: #222;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", sans-serif;
+  background: var(--md-bg);
+  color: var(--md-text-primary);
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 a {
-  color: #0d6efd;
+  color: var(--md-primary);
   text-decoration: none;
+  transition: color 0.15s ease;
 }
 
 a:hover {
   text-decoration: underline;
 }
 
-/* ========== Layout ========== */
+.muted {
+  color: var(--md-text-secondary);
+}
 
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 1rem; }
+
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+
+/* ============================================
+   App bar / header
+   ============================================ */
 header {
-  background: #20232a;
-  color: #fff;
-  padding: 0.75rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--md-primary);
+  color: #ffffff;
+  box-shadow: var(--md-elev-2);
+  padding: 0.6rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -32,63 +85,124 @@ header {
 
 header h1 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+header nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
 }
 
 header nav a {
-  color: #fff;
-  margin-left: 1rem;
-  font-size: 0.95rem;
+  color: #ffffff;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
 
 header nav a:hover {
-  text-decoration: underline;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* ============================================
+   Layout
+   ============================================ */
 main {
-  max-width: 1100px;
-  margin: 1.5rem auto 3rem;
-  padding: 0 1rem;
+  max-width: 1200px;
+  margin: 1.25rem auto 2.5rem;
+  padding: 0 1.25rem;
 }
 
-/* ========== Flash messages ========== */
+/* Generic card helper */
+.card {
+  background: var(--md-surface);
+  border-radius: var(--md-radius-large);
+  box-shadow: var(--md-elev-2);
+  padding: 1.4rem 1.6rem;
+}
 
+/* ============================================
+   Flash messages (snackbars/toasts)
+   ============================================ */
 .flash {
   padding: 0.75rem 1rem;
-  border-radius: 4px;
+  border-radius: var(--md-radius-large);
   margin-bottom: 1rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--md-elev-1);
 }
 
 .flash-success {
-  background: #d1e7dd;
-  border: 1px solid #badbcc;
-  color: #0f5132;
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #c8e6c9;
 }
 
 .flash-error {
-  background: #f8d7da;
-  border: 1px solid #f5c2c7;
-  color: #842029;
+  background: #ffebee;
+  color: #b71c1c;
+  border: 1px solid #ffcdd2;
 }
 
-/* ========== Buttons & links ========== */
-
+/* ============================================
+   Buttons
+   ============================================ */
 .btn {
-  display: inline-block;
-  padding: 0.45rem 0.9rem;
-  border-radius: 4px;
-  border: 1px solid #0d6efd;
-  background: #0d6efd;
-  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.55rem 1.3rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--md-primary);
+  color: #ffffff;
   font-size: 0.95rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   cursor: pointer;
+  box-shadow: var(--md-elev-1);
+  transition: background-color 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
 }
 
 .btn:hover {
-  background: #0b5ed7;
-  border-color: #0b5ed7;
+  background: var(--md-primary-dark);
+  box-shadow: var(--md-elev-2);
+  transform: translateY(-1px);
   text-decoration: none;
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: var(--md-elev-1);
+}
+
+.btn:disabled {
+  background: #bbdefb;
+  color: var(--md-text-disabled);
+  box-shadow: none;
+  cursor: default;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: var(--md-primary);
+  border: 1px solid var(--md-primary);
+  box-shadow: none;
+}
+
+.btn-secondary:hover {
+  background: var(--md-primary-light);
 }
 
 .link-button {
@@ -96,25 +210,32 @@ main {
   background: none;
   padding: 0;
   margin: 0;
-  color: #0d6efd;
+  color: var(--md-primary);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.link-button:hover {
-  text-decoration: underline;
+.btn:focus-visible,
+.link-button:focus-visible {
+  outline: 2px solid var(--md-primary);
+  outline-offset: 2px;
 }
 
-/* ========== Forms ========== */
-
+/* ============================================
+   Forms – Material-ish outlined textfields
+   ============================================ */
 .form-group {
-  margin-bottom: 0.9rem;
+  margin-bottom: 1.1rem;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 0.25rem;
+  font-size: 0.87rem;
   font-weight: 500;
+  color: var(--md-text-secondary);
 }
 
 .form-group input[type="text"],
@@ -125,14 +246,32 @@ main {
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 0.4rem 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  min-height: 2.6rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--md-radius-small);
+  border: 1px solid var(--md-border);
   font-size: 0.95rem;
+  background: var(--md-surface);
+  color: var(--md-text-primary);
+  outline: none;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
 }
 
 .form-group textarea {
   resize: vertical;
+  min-height: 80px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--md-primary);
+  box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.15);
+  background: #ffffff;
+}
+
+::placeholder {
+  color: var(--md-text-disabled);
 }
 
 .form-row {
@@ -142,104 +281,166 @@ main {
 }
 
 .form-row .form-group {
-  flex: 1 1 180px;
+  flex: 1 1 200px;
+}
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
 }
 
 .radio-group label {
-  margin-right: 1rem;
   font-weight: 400;
+  color: var(--md-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-/* Error messages under fields */
+/* Validation error text */
 .error {
-  color: #b02a37;
-  font-size: 0.85rem;
+  color: var(--md-error);
+  font-size: 0.8rem;
   margin-top: 0.2rem;
 }
 
-/* ========== Tables ========== */
-
+/* ============================================
+   Tables – Material data table style
+   ============================================ */
 .table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 0.75rem;
   font-size: 0.9rem;
-  background: #fff;
-  border-radius: 4px;
+  background: var(--md-surface);
+  border-radius: var(--md-radius-large);
   overflow: hidden;
+  box-shadow: var(--md-elev-1);
 }
 
 .table thead {
-  background: #e9ecef;
+  background: #eeeeee;
 }
 
 .table th,
 .table td {
-  padding: 0.5rem 0.6rem;
-  border-bottom: 1px solid #dee2e6;
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid var(--md-divider);
   text-align: left;
 }
 
-.table tr:last-child td {
-  border-bottom: none;
+.table th {
+  font-weight: 500;
+  color: var(--md-text-secondary);
+  text-transform: uppercase;
+  font-size: 0.8rem;
 }
 
 .table tbody tr:nth-child(even) {
-  background: #f8f9fa;
+  background: var(--md-surface-alt);
 }
 
-/* ========== Auth pages ========== */
+.table tbody tr:hover {
+  background: #e3f2fd;
+}
 
+/* For admin login rows */
+.login-success {
+  background: #e8f5e9;
+}
+
+.login-failure {
+  background: #ffebee;
+}
+
+/* ============================================
+   Auth pages (cards)
+   ============================================ */
 .auth-form {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 1.25rem 1.5rem;
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
+  max-width: 420px;
+  margin: 1.8rem auto;
+  padding: 1.6rem 1.8rem;
+  background: var(--md-surface);
+  border-radius: var(--md-radius-large);
+  box-shadow: var(--md-elev-3);
 }
 
 .auth-form h2 {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 500;
 }
 
-/* ========== Home, About ========== */
-
-.home, .about {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+/* ============================================
+   Generic content cards: Home / About / Error
+   ============================================ */
+.home,
+.about,
+.error-page {
+  background: var(--md-surface);
+  border-radius: var(--md-radius-large);
+  box-shadow: var(--md-elev-2);
+  padding: 1.5rem 1.8rem;
 }
 
-.home h2, .about h2 {
+.home h2,
+.about h2,
+.error-page h2 {
   margin-top: 0;
+  margin-bottom: 0.8rem;
+  font-size: 1.3rem;
+  font-weight: 500;
 }
 
-/* ========== Dashboard ========== */
+.about ul {
+  margin-top: 0.5rem;
+  padding-left: 1.25rem;
+  color: var(--md-text-secondary);
+}
 
+/* ============================================
+   Dashboard
+   ============================================ */
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+}
+
+.dashboard > h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  font-weight: 500;
 }
 
 .dashboard-stats {
-  background: #fff;
-  padding: 1rem 1.25rem;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+  background: var(--md-surface);
+  border-radius: var(--md-radius-large);
+  padding: 1.3rem 1.6rem;
+  box-shadow: var(--md-elev-2);
+}
+
+.dashboard-stats h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .dashboard-stats ul {
   list-style: none;
   padding-left: 0;
-  margin: 0.5rem 0 0;
+  margin: 0.2rem 0 0;
+  color: var(--md-text-secondary);
 }
 
 .dashboard-stats li {
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+
+.dashboard-stats li strong {
+  color: var(--md-text-primary);
 }
 
 .dashboard-recent {
@@ -250,103 +451,131 @@ main {
 
 .dashboard-column {
   flex: 1 1 320px;
-  background: #fff;
-  padding: 1rem 1.25rem;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+  background: var(--md-surface);
+  border-radius: var(--md-radius-large);
+  padding: 1.3rem 1.6rem;
+  box-shadow: var(--md-elev-1);
 }
 
-/* ========== Workouts & Metrics ========== */
-
-.workouts, .metrics {
-  background: #fff;
-  padding: 1.25rem 1.5rem;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+/* ============================================
+   Workouts & Metrics sections
+   ============================================ */
+.workouts,
+.metrics {
+  background: var(--md-surface);
+  border-radius: var(--md-radius-large);
+  box-shadow: var(--md-elev-3);
+  padding: 1.5rem 1.8rem;
 }
 
-.workouts h2, .metrics h2 {
+.workouts h2,
+.metrics h2 {
   margin-top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
-.workouts-actions, .metrics-actions {
-  margin-bottom: 0.75rem;
+.workouts-actions,
+.metrics-actions {
+  margin: 0.4rem 0 0.9rem;
 }
 
-.workouts-filters, .metrics-filters {
-  margin-bottom: 0.75rem;
-  padding: 0.75rem 0.9rem;
-  background: #f8f9fa;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
+.workouts-filters,
+.metrics-filters {
+  margin-bottom: 0.9rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--md-radius);
+  background: var(--md-surface-alt);
+  border: 1px solid var(--md-border);
 }
 
-/* ========== Search ========== */
-
-.search-page, .search-results-page {
-  background: #fff;
-  padding: 1.25rem 1.5rem;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+/* ============================================
+   Search pages
+   ============================================ */
+.search-page,
+.search-results-page {
+  background: var(--md-surface);
+  border-radius: var(--md-radius-large);
+  box-shadow: var(--md-elev-3);
+  padding: 1.5rem 1.8rem;
 }
 
 .search-page h2,
 .search-results-page h2 {
   margin-top: 0;
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
 .search-summary ul {
   list-style: none;
   padding-left: 0;
-  margin: 0.5rem 0 0.5rem;
+  margin: 0.4rem 0 0.75rem;
+  color: var(--md-text-secondary);
 }
 
-/* ========== Admin ========== */
+.search-section {
+  margin-top: 1rem;
+}
 
+/* ============================================
+   Admin dashboard
+   ============================================ */
 .admin-dashboard {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .admin-stats {
-  background: #fff;
-  padding: 1rem 1.25rem;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+  background: var(--md-surface);
+  border-radius: var(--md-radius-large);
+  box-shadow: var(--md-elev-2);
+  padding: 1.5rem 1.8rem;
+}
+
+.admin-stats h2,
+.admin-stats h3 {
+  margin-top: 0;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.6rem;
 }
 
 .stat-card {
-  background: #f8f9fa;
-  border-radius: 4px;
-  padding: 0.6rem 0.7rem;
-  border: 1px solid #dee2e6;
+  background: var(--md-surface-alt);
+  border-radius: var(--md-radius);
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--md-border);
 }
 
 .stat-card h4 {
-  margin: 0 0 0.3rem;
-  font-size: 0.95rem;
-  font-weight: 600;
+  margin: 0 0 0.2rem;
+  font-size: 0.9rem;
+  color: var(--md-text-secondary);
+  font-weight: 500;
 }
 
 .stat-card p {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--md-primary);
 }
 
 .admin-users,
 .admin-logins {
-  background: #fff;
-  padding: 1rem 1.25rem;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+  background: var(--md-surface);
+  border-radius: var(--md-radius-large);
+  box-shadow: var(--md-elev-2);
+  padding: 1.5rem 1.8rem;
 }
 
 .admin-users h3,
@@ -354,48 +583,47 @@ main {
   margin-top: 0;
 }
 
-/* inactive users greyed */
 .user-inactive {
-  color: #6c757d;
+  color: var(--md-text-disabled);
 }
 
-/* login row colouring */
-.login-success {
-  background: #e9f7ef;
-}
-
-.login-failure {
-  background: #fbe9eb;
-}
-
-/* ========== Error pages ========== */
-
-.error-page {
-  background: #fff;
-  padding: 1.25rem 1.5rem;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
-}
-
-.error-page h2 {
-  margin-top: 0;
-}
-
-/* ========== Small screens ========== */
-
-@media (max-width: 700px) {
+/* ============================================
+   Responsive tweaks
+   ============================================ */
+@media (max-width: 768px) {
   header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 0.3rem;
   }
 
-  header nav a {
-    margin-left: 0;
-    margin-right: 0.75rem;
+  header nav {
+    flex-wrap: wrap;
+  }
+
+  main {
+    padding: 0 1rem;
   }
 
   .dashboard-recent {
     flex-direction: column;
+  }
+
+  .auth-form,
+  .home,
+  .about,
+  .error-page,
+  .workouts,
+  .metrics,
+  .search-page,
+  .search-results-page,
+  .admin-stats,
+  .admin-users,
+  .admin-logins {
+    padding: 1.25rem 1.3rem;
+  }
+
+  .table {
+    font-size: 0.85rem;
   }
 }

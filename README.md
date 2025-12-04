@@ -3,7 +3,8 @@
 A small health-tracking web application built with **Node.js**, **Express**, **EJS**, and **MySQL**.
 
 Users can register, log in, and track their **workouts** and **health metrics** (weight, blood pressure, heart rate, steps, sleep, etc.).  
-An **admin panel** provides an overview of users, simple activity statistics, and recent login attempts.
+An **admin panel** provides an overview of users, simple activity statistics, and recent login attempts.  
+A separate **weather page** integrates with the OpenWeatherMap API to show current conditions for a chosen city as an extra feature.
 
 ## 1. Features
 
@@ -36,6 +37,18 @@ An **admin panel** provides an overview of users, simple activity statistics, an
 - **Search**
   - Search across **workouts** and/or **metrics**
   - Filter by keyword, scope (workouts / metrics / both), and date range
+
+- **Weather (extra feature)**
+  - Weather page at `/weather`
+  - Users can enter a city name (e.g. `London,uk`, `Paris,fr`)
+  - Server calls the **OpenWeatherMap** API and shows:
+    - City / country
+    - Temperature and “feels like” temperature
+    - Humidity
+    - Wind speed
+    - Short description (e.g. “clear sky”)
+  - Robust error handling:
+    - Friendly messages for unknown city, missing API key, or network/API errors
 
 - **Error pages**
   - 403 – forbidden (e.g. user tries to open `/admin` without admin role)
@@ -80,9 +93,15 @@ An **admin panel** provides an overview of users, simple activity statistics, an
 - **Validation & UX**
   - `express-validator`
   - `connect-flash`
+  - Custom CSS inspired by **Material Design** for cards, forms, and tables
 
 - **Config**
   - `dotenv`
+
+- **External API (weather feature)**
+  - **OpenWeatherMap** current weather API
+  - API key provided via `OPENWEATHER_API_KEY` in `.env`
+  - Weather data fetched server-side and rendered into an EJS template
 
 ## 3. Project structure
 
@@ -96,7 +115,7 @@ An **admin panel** provides an overview of users, simple activity statistics, an
 ├─ .env.example             # Example environment variables
 ├─ package.json
 ├─ public/
-│  └─ main.css              # Shared styles
+│  └─ main.css              # Shared styles (Material Design-inspired)
 ├─ routes/
 │  ├─ home.js
 │  ├─ auth.js
@@ -104,7 +123,8 @@ An **admin panel** provides an overview of users, simple activity statistics, an
 │  ├─ workouts.js
 │  ├─ metrics.js
 │  ├─ search.js
-│  └─ admin.js
+│  ├─ admin.js
+│  └─ weather.js            # Weather page (OpenWeatherMap integration)
 └─ views/
    ├─ partials/
    │  ├─ header.ejs         # <head> + navigation + opening <main> + flash
@@ -128,6 +148,7 @@ An **admin panel** provides an overview of users, simple activity statistics, an
    ├─ search/
    │  ├─ search.ejs
    │  └─ results.ejs
+   └─ weather.ejs           # Weather page UI
    └─ admin.ejs             # Admin dashboard
 ````
 
@@ -140,6 +161,8 @@ All “page” views include:
 
 <%- include('../partials/footer') %>
 ```
+
+`weather.ejs` follows the same pattern (header + footer) and renders the search form, any error message, and the current weather card.
 
 ## 4. Database design
 
@@ -196,8 +219,6 @@ Individual workout sessions per user.
 
 Index: `(user_id, workout_date)` for faster per-user queries.
 
----
-
 ### 4.4 `metric_types`
 
 Lookup table for different health metrics.
@@ -240,6 +261,7 @@ Logging login attempts (used on the admin dashboard).
 | user_agent       | VARCHAR(255) NULL          | Browser / client string       |
 | attempted_at     | DATETIME                   | Default current timestamp     |
 
+> Weather data is retrieved live from the OpenWeatherMap API and **not** stored in the database.
 
 ## 5. Database setup scripts
 
@@ -259,8 +281,6 @@ ON health_app.* TO 'health_app'@'localhost';
 ```
 
 > In development, the app is configured to connect using this `health_app` MySQL user.
-
----
 
 ### 5.2 `insert_test_data.sql` (summary)
 
@@ -282,7 +302,6 @@ ON health_app.* TO 'health_app'@'localhost';
 The script inserts the **bcrypt hash** for `"smiths"` into `users.password_hash`.
 Markers can also create additional **user** accounts via the registration form.
 
-
 ## 6. Environment variables
 
 `.env.example`:
@@ -295,6 +314,9 @@ DB_PASSWORD=qwertyuiop
 DB_NAME=health_app
 
 SESSION_SECRET=change_this_in_real_env
+
+# Weather feature (OpenWeatherMap)
+OPENWEATHER_API_KEY=your_openweathermap_api_key_here
 ```
 
 Steps:
@@ -306,6 +328,9 @@ Steps:
    ```
 
 2. Adjust values if needed (e.g. different DB user/password, stronger `SESSION_SECRET`).
+
+3. (Optional but recommended) Sign up at OpenWeatherMap and set a real value for `OPENWEATHER_API_KEY`.
+   If no key is provided, the `/weather` page will show a clear message explaining that weather is not configured.
 
 The `.env` file is **not committed** to the repository.
 
@@ -321,6 +346,7 @@ app.use('/workouts', workoutsRoutes);
 app.use('/metrics', metricsRoutes);
 app.use('/search', searchRoutes);
 app.use('/admin', adminRoutes);
+app.use('/weather', weatherRoutes);
 ```
 
 ### Key routes (summary)
@@ -352,7 +378,9 @@ app.use('/admin', adminRoutes);
 | Admin     | GET    | `/admin`                         | requireAdmin       | Admin dashboard (stats + users + login audit)   |
 | Admin     | POST   | `/admin/users/:id/role`          | requireAdmin       | Change user role                                |
 | Admin     | POST   | `/admin/users/:id/toggle-active` | requireAdmin       | Activate / deactivate user                      |
+| Weather   | GET    | `/weather`                       | (optional login)   | Weather form + current weather for a city       |
 
+> The `/weather` route can either be open to all users or wrapped in `requireLogin` depending on configuration. It uses the OpenWeatherMap API and shows friendly error messages when something goes wrong.
 
 ## 8. Middleware
 
@@ -380,6 +408,7 @@ Defined in `_middleware.js`:
 * Node.js **18+**
 * MySQL **8+**
 * A MySQL user with permission to run `create_db.sql` and `insert_test_data.sql` once.
+* (Optional) An OpenWeatherMap API key if you want the weather feature to be fully functional.
 
 ### Steps
 
@@ -409,7 +438,7 @@ Defined in `_middleware.js`:
 
    ```bash
    cp .env.example .env
-   # Edit .env if needed (DB credentials, SESSION_SECRET, etc.)
+   # Edit .env if needed (DB credentials, SESSION_SECRET, OPENWEATHER_API_KEY, etc.)
    ```
 
 5. **Run the app**
@@ -431,5 +460,5 @@ Defined in `_middleware.js`:
 
    * Access `/admin` to see the admin panel.
    * Register new normal users through `/auth/register`.
-
+   * Open `/weather` to test the weather feature (with a valid `OPENWEATHER_API_KEY`).
 
