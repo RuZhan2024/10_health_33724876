@@ -1,5 +1,5 @@
 -- create_db.sql – Health Tracking App
--- NOTE: change 'health_app' to your required database name if needed.
+-- You can change 'health_app' below if you want a different database name.
 
 DROP DATABASE IF EXISTS health_app;
 CREATE DATABASE IF NOT EXISTS health_app
@@ -8,9 +8,8 @@ CREATE DATABASE IF NOT EXISTS health_app
 
 USE health_app;
 
--- -----------------------------
--- 1. Users
--- -----------------------------
+-- Users table
+-- Stores login details and basic account info.
 CREATE TABLE users (
   id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   username        VARCHAR(50) NOT NULL,
@@ -25,9 +24,9 @@ CREATE TABLE users (
   CONSTRAINT uq_users_email    UNIQUE (email)
 ) ENGINE=InnoDB;
 
--- -----------------------------
--- 2. Workout types (lookup)
--- -----------------------------
+
+-- Workout types
+-- Simple lookup table for naming workout categories.
 CREATE TABLE workout_types (
   id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name        VARCHAR(50) NOT NULL,
@@ -36,9 +35,8 @@ CREATE TABLE workout_types (
   CONSTRAINT uq_workout_types_name UNIQUE (name)
 ) ENGINE=InnoDB;
 
--- -----------------------------
--- 3. Workouts
--- -----------------------------
+-- Workouts
+-- Individual workout records linked to a user and a workout type.
 CREATE TABLE workouts (
   id                INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id           INT UNSIGNED NOT NULL,
@@ -57,13 +55,13 @@ CREATE TABLE workouts (
     ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- Helpful index for per-user time-range queries
+-- Index to speed up “show my workouts over time” queries
 CREATE INDEX idx_workouts_user_date
   ON workouts (user_id, workout_date);
 
--- -----------------------------
--- 4. Metric types (lookup)
--- -----------------------------
+
+-- Metric types
+-- Lookup table for things like weight, blood pressure, steps, etc.
 CREATE TABLE metric_types (
   id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name         VARCHAR(50) NOT NULL,
@@ -73,9 +71,8 @@ CREATE TABLE metric_types (
   CONSTRAINT uq_metric_types_name UNIQUE (name)
 ) ENGINE=InnoDB;
 
--- -----------------------------
--- 5. Metrics
--- -----------------------------
+-- Metrics
+-- Stores actual measurements for each user (weight, BP, sleep, etc.).
 CREATE TABLE metrics (
   id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id         INT UNSIGNED NOT NULL,
@@ -94,12 +91,12 @@ CREATE TABLE metrics (
     ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
+-- Index to make user + date lookups faster
 CREATE INDEX idx_metrics_user_date
   ON metrics (user_id, metric_date);
 
--- -----------------------------
--- 6. Login audit (bonus / optional)
--- -----------------------------
+-- Login audit
+-- Optional table to log login attempts (for an admin view).
 CREATE TABLE login_audit (
   id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id          INT UNSIGNED NULL,
@@ -117,11 +114,14 @@ CREATE TABLE login_audit (
 CREATE INDEX idx_login_audit_user_time
   ON login_audit (user_id, attempted_at);
 
--- Optional: create dedicated MySQL user for the app (run as root / admin)
+-- MySQL user for the app
+-- Run this part as root/admin in MySQL.
+-- In production you’d probably lock this down to specific privileges.
 CREATE USER IF NOT EXISTS 'health_app'@'localhost' IDENTIFIED BY 'qwertyuiop';
 
 GRANT ALL PRIVILEGES ON health_app.* TO 'health_app'@'localhost';
 FLUSH PRIVILEGES;
 
+-- More restrictive permissions
 -- GRANT SELECT, INSERT, UPDATE, DELETE
 -- ON health_app.* TO 'health_app'@'localhost';

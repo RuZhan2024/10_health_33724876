@@ -214,4 +214,42 @@ router.get('/logout', requireLogin, (req, res) => {
 });
 
 
+// Show a confirmation page so users don't delete by accident.
+router.get('/delete-account', requireLogin, (req, res) => {
+  res.render('auth/delete_account', {
+    pageTitle: 'Delete My Account'
+  });
+});
+
+// Delete the logged-in user's account and related data.
+router.post('/delete-account', requireLogin, async (req, res) => {
+  const userId = req.session.user.id;
+
+  try {
+    // Delete the user row.
+    // Because of ON DELETE CASCADE, workouts and metrics
+    // for this user will be removed automatically.
+    await pool.query('DELETE FROM users WHERE id = ?', [userId]);
+
+    // Clear the session (similar pattern to /auth/logout)
+    req.session.regenerate(err => {
+      if (err) {
+        console.error(err);
+        return res.status(500).render('error_500');
+      }
+
+      req.flash(
+        'success',
+        'Your account and related data have been deleted.'
+      );
+      res.redirect('/');
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).render('error_500');
+  }
+});
+
+
+
 module.exports = router;
