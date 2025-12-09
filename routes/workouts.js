@@ -165,7 +165,7 @@ router.post(
         return res.status(422).render('workouts/form', {
           pageTitle: 'Add Workout',
           formTitle: 'Add Workout',
-          formAction: '/workouts/add',
+          formAction: './workouts/add',
           workoutTypes,
           workout: workoutForForm,
           errors: errors.mapped()
@@ -189,7 +189,7 @@ router.post(
       );
 
       req.flash('success', 'Workout added successfully.');
-      res.redirect('/workouts');
+      res.redirect('../workouts');
     } catch (err) {
       console.error(err);
       res.status(500).render('error_500');
