@@ -183,7 +183,7 @@ router.post(
       );
 
       req.flash('success', 'Metric added successfully.');
-      res.redirect('/metrics');
+      res.redirect('../metrics');
     } catch (err) {
       console.error(err);
       res.status(500).render('error_500');
@@ -323,7 +323,7 @@ router.post(
       }
 
       req.flash('success', 'Metric updated successfully.');
-      res.redirect('/metrics');
+      res.redirect('../../metrics');
     } catch (err) {
       console.error(err);
       res.status(500).render('error_500');
@@ -350,7 +350,7 @@ router.post('/:id/delete', requireLogin, async (req, res) => {
       req.flash('error', 'Metric not found or not authorised.');
     }
 
-    res.redirect('/metrics');
+    res.redirect('../../metrics');
   } catch (err) {
     console.error(err);
     res.status(500).render('error_500');

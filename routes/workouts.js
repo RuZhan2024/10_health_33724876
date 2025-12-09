@@ -334,7 +334,7 @@ router.post(
       }
 
       req.flash('success', 'Workout updated successfully.');
-      res.redirect('/workouts');
+      res.redirect('../../workouts');
     } catch (err) {
       console.error(err);
       res.status(500).render('error_500');
@@ -361,7 +361,7 @@ router.post('/:id/delete', requireLogin, async (req, res) => {
       req.flash('error', 'Workout not found or not authorised.');
     }
 
-    res.redirect('/workouts');
+    res.redirect('../../workouts');
   } catch (err) {
     console.error(err);
     res.status(500).render('error_500');
