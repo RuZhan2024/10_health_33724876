@@ -1,18 +1,17 @@
-// routes/dashboard.js
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const { requireLogin } = require('./_middleware');
 
 /**
- * GET /dashboard
- * Show recent workouts, recent metrics, and some stats for the current user.
+ * Personal dashboard for the logged-in user.
+ * Shows a few recent workouts and metrics, plus summary stats.
  */
 router.get('/', requireLogin, async (req, res) => {
   const userId = req.session.user.id;
 
   try {
-    // Recent workouts (last 5)
+    // Last 5 workouts for this user.
     const [recentWorkouts] = await pool.query(
       `
       SELECT w.id,
@@ -30,7 +29,7 @@ router.get('/', requireLogin, async (req, res) => {
       [userId]
     );
 
-    // Recent metrics (last 5)
+    // Last 5 metrics for this user.
     const [recentMetrics] = await pool.query(
       `
       SELECT m.id,
@@ -48,7 +47,7 @@ router.get('/', requireLogin, async (req, res) => {
       [userId]
     );
 
-    // Workouts in last 7 days
+    // Workouts in the last 7 days (for quick activity overview).
     const [workoutsLast7Rows] = await pool.query(
       `
       SELECT COUNT(*) AS count, COALESCE(SUM(duration_minutes), 0) AS total_minutes
@@ -60,7 +59,7 @@ router.get('/', requireLogin, async (req, res) => {
     );
     const workoutsLast7 = workoutsLast7Rows[0] || { count: 0, total_minutes: 0 };
 
-    // Workouts in last 30 days (for avg duration etc.)
+    // Workouts in the last 30 days, used for average activity stats.
     const [workoutsLast30Rows] = await pool.query(
       `
       SELECT COUNT(*) AS count, COALESCE(SUM(duration_minutes), 0) AS total_minutes
@@ -72,7 +71,7 @@ router.get('/', requireLogin, async (req, res) => {
     );
     const workoutsLast30 = workoutsLast30Rows[0] || { count: 0, total_minutes: 0 };
 
-    // How many metric entries overall
+    // How many metric records the user has ever created.
     const [metricsCountRows] = await pool.query(
       `
       SELECT COUNT(*) AS count

@@ -1,4 +1,3 @@
-// routes/metrics.js
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const pool = require('../db');
@@ -6,6 +5,9 @@ const { requireLogin } = require('./_middleware');
 
 const router = express.Router();
 
+/**
+ * Format a Date (or date string) as YYYY-MM-DD for HTML date inputs.
+ */
 function formatDate(date) {
   if (!date) return '';
   if (typeof date === 'string') return date.slice(0, 10);
@@ -13,8 +15,7 @@ function formatDate(date) {
 }
 
 /**
- * GET /metrics
- * List metrics for the current user, with optional filters.
+ * Show all metrics for the logged-in user, with optional filters.
  */
 router.get('/', requireLogin, async (req, res) => {
   const userId = req.session.user.id;
@@ -23,7 +24,7 @@ router.get('/', requireLogin, async (req, res) => {
   const toDate = req.query.to || '';
 
   try {
-    // Load metric types for filter dropdown
+    // Load metric types so the user can filter in the dropdown.
     const [metricTypes] = await pool.query(
       'SELECT id, name FROM metric_types ORDER BY name ASC'
     );
@@ -62,6 +63,7 @@ router.get('/', requireLogin, async (req, res) => {
       params
     );
 
+    // Pre-format date for display in the template.
     const metrics = rows.map(m => ({
       ...m,
       metric_date_str: formatDate(m.metric_date)
@@ -84,8 +86,7 @@ router.get('/', requireLogin, async (req, res) => {
 });
 
 /**
- * GET /metrics/add
- * Show form to add a new metric.
+ * Render the form for adding a new metric.
  */
 router.get('/add', requireLogin, async (req, res) => {
   try {
@@ -114,8 +115,7 @@ router.get('/add', requireLogin, async (req, res) => {
 });
 
 /**
- * POST /metrics/add
- * Insert a new metric.
+ * Create a new metric for the current user.
  */
 router.post(
   '/add',
@@ -155,6 +155,7 @@ router.post(
       );
 
       if (!errors.isEmpty()) {
+        // Re-render the form with validation messages and the user input.
         return res.status(422).render('metrics/form', {
           pageTitle: 'Add Metric',
           formTitle: 'Add Metric',
@@ -191,8 +192,7 @@ router.post(
 );
 
 /**
- * GET /metrics/:id/edit
- * Show edit form for an existing metric.
+ * Show the edit form for one metric belonging to the current user.
  */
 router.get('/:id/edit', requireLogin, async (req, res) => {
   const userId = req.session.user.id;
@@ -210,6 +210,7 @@ router.get('/:id/edit', requireLogin, async (req, res) => {
     );
 
     if (rows.length === 0) {
+      // Either the metric does not exist, or it belongs to another user.
       return res.status(404).render('error_404');
     }
 
@@ -243,8 +244,7 @@ router.get('/:id/edit', requireLogin, async (req, res) => {
 });
 
 /**
- * POST /metrics/:id/edit
- * Update an existing metric.
+ * Save changes to an existing metric.
  */
 router.post(
   '/:id/edit',
@@ -318,6 +318,7 @@ router.post(
       );
 
       if (result.affectedRows === 0) {
+        // Metric was not found or belonged to someone else.
         return res.status(404).render('error_404');
       }
 
@@ -331,8 +332,7 @@ router.post(
 );
 
 /**
- * POST /metrics/:id/delete
- * Delete a metric owned by the current user.
+ * Remove a metric owned by the current user.
  */
 router.post('/:id/delete', requireLogin, async (req, res) => {
   const userId = req.session.user.id;

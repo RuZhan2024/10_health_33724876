@@ -1,10 +1,12 @@
-// routes/search.js
 const express = require('express');
 const pool = require('../db');
 const { requireLogin } = require('./_middleware');
 
 const router = express.Router();
 
+/**
+ * Format a date as YYYY-MM-DD for display.
+ */
 function formatDate(date) {
   if (!date) return '';
   if (typeof date === 'string') return date.slice(0, 10);
@@ -12,8 +14,7 @@ function formatDate(date) {
 }
 
 /**
- * GET /search
- * Show search form.
+ * Show the combined search form for workouts and metrics.
  */
 router.get('/', requireLogin, (req, res) => {
   res.render('search/search', {
@@ -28,8 +29,7 @@ router.get('/', requireLogin, (req, res) => {
 });
 
 /**
- * GET /search/results
- * Perform search on workouts and/or metrics.
+ * Perform a search on workouts and/or metrics.
  * Query params:
  *  - scope: "all" | "workouts" | "metrics"
  *  - keyword: text to search in type name or notes
@@ -54,12 +54,13 @@ router.get('/results', requireLogin, async (req, res) => {
   let metrics = [];
 
   try {
-    // ----- Build WORKOUTS query if needed -----
+    // Build the workouts query if the user wants workouts or "all".
     if (scope === 'all' || scope === 'workouts') {
       const whereClausesW = ['w.user_id = ?'];
       const paramsW = [userId];
 
       if (keyword) {
+        // Search within workout type name or notes.
         whereClausesW.push('(wt.name LIKE ? OR w.notes LIKE ?)');
         const like = `%${keyword}%`;
         paramsW.push(like, like);
@@ -97,12 +98,13 @@ router.get('/results', requireLogin, async (req, res) => {
       }));
     }
 
-    // ----- Build METRICS query if needed -----
+    // Build the metrics query if the user wants metrics or "all".
     if (scope === 'all' || scope === 'metrics') {
       const whereClausesM = ['m.user_id = ?'];
       const paramsM = [userId];
 
       if (keyword) {
+        // Search within metric type name or notes.
         whereClausesM.push('(mt.name LIKE ? OR m.notes LIKE ?)');
         const like = `%${keyword}%`;
         paramsM.push(like, like);

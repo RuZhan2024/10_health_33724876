@@ -1,464 +1,276 @@
-# 10_health_33724876 – Health Tracker (Express + MySQL)
+# 10_health_33724876 – Health Tracker
 
-A small health-tracking web application built with **Node.js**, **Express**, **EJS**, and **MySQL**.
+A small health-tracking web application built with Node.js, Express, EJS, and MySQL.
 
-Users can register, log in, and track their **workouts** and **health metrics** (weight, blood pressure, heart rate, steps, sleep, etc.).  
-An **admin panel** provides an overview of users, simple activity statistics, and recent login attempts.  
-A separate **weather page** integrates with the OpenWeatherMap API to show current conditions for a chosen city as an extra feature.
+Users can:
 
-## 1. Features
+- Register and log in
+- Record workouts
+- Record health metrics
+- Search their own data
+- View a personal dashboard
+- (Admins) View an admin dashboard
+- View current weather via OpenWeatherMap
 
-### Core user features
 
-- **User registration & login**  
-  - Passwords stored as **bcrypt hashes**
-  - Validation using `express-validator`
-  - Flash messages for errors/success (`connect-flash`)
 
-- **Role-based access**
-  - `user` – normal user
-  - `admin` – access to `/admin` dashboard
-  - New registrations always get `role = 'user'` by default
+## Features
 
-- **Personal dashboard**
-  - Recent **workouts** and **metrics**
-  - Simple summary stats (totals / last 7 days)
+### Authentication and accounts
 
-- **Workouts module**
-  - List your own workouts
-  - Add / edit / delete workouts
-  - Filter by **date range** and **workout type**
+- Registration and login with server-side validation
+- Passwords hashed with bcrypt
+- Session-based auth with `express-session` and MySQL session store
+- Roles: `user` and `admin`
+- Middleware:
+  - `requireLogin` – blocks guests
+  - `requireAdmin` – blocks non-admins
 
-- **Metrics module**
-  - List your own health metrics (weight, BP, HR, steps, sleep, etc.)
-  - Add / edit / delete metrics
-  - Filter by **date range** and **metric type**
+### Dashboard
 
-- **Search**
-  - Search across **workouts** and/or **metrics**
-  - Filter by keyword, scope (workouts / metrics / both), and date range
+- Route: `/dashboard`
+- Shows:
+  - Recent workouts
+  - Recent metrics
+  - Basic stats (workouts and minutes in last 7 / 30 days, metric count)
 
-- **Weather (extra feature)**
-  - Weather page at `/weather`
-  - Users can enter a city name (e.g. `London,uk`, `Paris,fr`)
-  - Server calls the **OpenWeatherMap** API and shows:
-    - City / country
-    - Temperature and “feels like” temperature
-    - Humidity
-    - Wind speed
-    - Short description (e.g. “clear sky”)
-  - Robust error handling:
-    - Friendly messages for unknown city, missing API key, or network/API errors
+### Workouts
 
-- **Error pages**
-  - 403 – forbidden (e.g. user tries to open `/admin` without admin role)
-  - 404 – not found
-  - 500 – server error
+- Routes under `/workouts`
+- Per-user CRUD:
+  - List with filters (type, date range)
+  - Add / edit / delete
+- Fields:
+  - Date
+  - Type (from `workout_types`)
+  - Duration (minutes)
+  - Intensity: `low` / `medium` / `high`
+  - Notes (optional)
 
-### Admin features
+### Metrics
 
-- **Admin dashboard (`/admin`)**
-  - Overall site stats:
-    - Total users / admins / active users
-    - Total workouts & metrics
-    - Workouts and metrics in the last 7 days
-  - Users table:
-    - Username, email, role, active status
-    - Counts of workouts & metrics per user
-    - Created time and last login time
-  - Actions:
-    - Change user role (`user` ↔ `admin`)
-    - Activate / deactivate users (cannot deactivate yourself)
-  - **Login audit**:
-    - Recent login attempts (username, success/failure, IP, user agent, timestamp)
+- Routes under `/metrics`
+- Per-user CRUD:
+  - List with filters (type, date range)
+  - Add / edit / delete
+- Fields:
+  - Date
+  - Metric type (from `metric_types`)
+  - Value
+  - Unit (optional, default from type)
+  - Notes (optional)
 
-## 2. Tech stack
+### Search
 
-- **Backend**
-  - Node.js
-  - Express
+- Routes: `/search`, `/search/results`
+- Search scope: `all`, `workouts`, `metrics`
+- Filters:
+  - Keyword (type name and notes)
+  - Date range
+- Results separated into workouts and metrics lists
 
-- **Templating**
-  - EJS
+### Weather
 
-- **Database**
-  - MySQL 8
-  - `mysql2` for queries
-  - `express-mysql-session` for session storage
+- Route: `/weather`
+- Uses OpenWeatherMap current weather API
+- Input: city name (query param `city`)
+- Shows:
+  - City and country
+  - Temperature, feels like
+  - Humidity
+  - Wind speed
+  - Description
+- Handles:
+  - Missing or invalid city
+  - Network / API errors
+  - Missing `OPENWEATHER_API_KEY` (shows clear message)
 
-- **Auth / security**
-  - `express-session`
-  - `bcrypt`
+### Admin dashboard
 
-- **Validation & UX**
-  - `express-validator`
-  - `connect-flash`
-  - Custom CSS inspired by **Material Design** for cards, forms, and tables
+- Route: `/admin` (admin only)
+- Shows:
+  - Site stats (users, admins, active users, workouts, metrics)
+  - Per-user counts of workouts and metrics
+  - Created date and last login
+- Actions:
+  - Change user role (user/admin)
+  - Toggle account active/inactive
+  - Protects against removing your own admin role or deactivating yourself
+- Recent login attempts from `login_audit` (username, success, IP, UA, timestamp)
 
-- **Config**
-  - `dotenv`
 
-- **External API (weather feature)**
-  - **OpenWeatherMap** current weather API
-  - API key provided via `OPENWEATHER_API_KEY` in `.env`
-  - Weather data fetched server-side and rendered into an EJS template
 
-## 3. Project structure
+## Tech stack
+
+- Node.js, Express
+- EJS templates
+- MySQL 8, `mysql2`
+- `express-session`, `express-mysql-session`
+- `bcrypt`
+- `express-validator`
+- `connect-flash`
+- `dotenv`
+- OpenWeatherMap API (via `fetch`)
+- Tests: `mocha`, `supertest`, `chai`
+
+
+
+## Project structure (simplified)
 
 ```text
-10_health_33724876/
-├─ index.js                 # Main Express app (middleware + routes)
-├─ db.js                    # MySQL connection / session store config
-├─ _middleware.js           # Auth / role middleware & locals
-├─ create_db.sql            # Create database, tables, app user & grants
-├─ insert_test_data.sql     # Seed data (admin user, types, sample data)
-├─ .env.example             # Example environment variables
-├─ package.json
-├─ public/
-│  └─ main.css              # Shared styles (Material Design-inspired)
-├─ routes/
-│  ├─ home.js
-│  ├─ auth.js
-│  ├─ dashboard.js
-│  ├─ workouts.js
-│  ├─ metrics.js
-│  ├─ search.js
-│  ├─ admin.js
-│  └─ weather.js            # Weather page (OpenWeatherMap integration)
-└─ views/
-   ├─ partials/
-   │  ├─ header.ejs         # <head> + navigation + opening <main> + flash
-   │  ├─ footer.ejs         # closing </main> and </body></html>
-   │  └─ _flash.ejs         # flash message partial
-   ├─ home.ejs
-   ├─ about.ejs
-   ├─ error_403.ejs
-   ├─ error_404.ejs
-   ├─ error_500.ejs
-   ├─ auth/
-   │  ├─ login.ejs
-   │  └─ register.ejs
-   ├─ dashboard.ejs
-   ├─ workouts/
-   │  ├─ list.ejs
-   │  └─ form.ejs
-   ├─ metrics/
-   │  ├─ list.ejs
-   │  └─ form.ejs
-   ├─ search/
-   │  ├─ search.ejs
-   │  └─ results.ejs
-   └─ weather.ejs           # Weather page UI
-   └─ admin.ejs             # Admin dashboard
+index.js           # Express app setup (middleware + routes)
+db.js              # MySQL pool and session store
+
+routes/
+  home.js          # /, /about
+  auth.js          # register, login, logout, delete account
+  dashboard.js     # /dashboard
+  workouts.js      # /workouts...
+  metrics.js       # /metrics...
+  search.js        # /search...
+  admin.js         # /admin...
+  weather.js       # /weather
+
+views/
+  partials/        # header, footer, flash messages
+  auth/            # login, register, delete account
+  workouts/        # list, form
+  metrics/         # list, form
+  search/          # search, results
+  home.ejs
+  about.ejs
+  dashboard.ejs
+  weather.ejs
+  admin.ejs
+  error_403.ejs
+  error_404.ejs
+  error_500.ejs
+
+public/
+  main.css
+
+_middleware.js     # requireLogin, requireAdmin, attachUserToLocals
+create_db.sql      # schema + basic user privileges
+insert_test_data.sql
+app.test.js        # router / integration tests
+.env.example
+README.md
 ````
 
-All “page” views include:
 
-```ejs
-<%- include('../partials/header', { pageTitle: 'Page Title' }) %>
 
-<!-- page content -->
+## Database (overview)
 
-<%- include('../partials/footer') %>
-```
-
-`weather.ejs` follows the same pattern (header + footer) and renders the search form, any error message, and the current weather card.
-
-## 4. Database design
-
-**Database name:** `health_app`
+Database name (example): `health_app`
 
 Tables:
 
-1. `users`
-2. `workout_types`
-3. `workouts`
-4. `metric_types`
-5. `metrics`
-6. `login_audit`
+* `users`
 
-### 4.1 `users`
+  * username, email (unique)
+  * password_hash
+  * role (`user` / `admin`)
+  * is_active (1/0)
+  * created_at, last_login
+* `workout_types`
+* `workouts`
 
-Stores user accounts and roles.
+  * user_id, workout_type_id
+  * workout_date
+  * duration_minutes
+  * intensity
+  * notes
+* `metric_types`
 
-| Column        | Type                 | Notes                       |
-| ------------- | -------------------- | --------------------------- |
-| id            | INT UNSIGNED PK      | Auto-increment              |
-| username      | VARCHAR(50) UNIQUE   | Login name                  |
-| email         | VARCHAR(255) UNIQUE  | User email                  |
-| password_hash | VARCHAR(255)         | Bcrypt hash                 |
-| role          | ENUM('user','admin') | Default `'user'`            |
-| is_active     | TINYINT(1)           | 1 = active, 0 = deactivated |
-| created_at    | DATETIME             | Default current timestamp   |
-| last_login    | DATETIME NULL        | Updated on successful login |
+  * default_unit
+* `metrics`
 
-### 4.2 `workout_types`
+  * user_id, metric_type_id
+  * metric_date
+  * value, unit
+  * notes
+* `login_audit`
 
-Lookup table for possible workout types.
+  * user_id (nullable), username_attempt
+  * success (1/0)
+  * ip_address, user_agent
+  * attempted_at
 
-| Column      | Type               | Notes                 |
-| ----------- | ------------------ | --------------------- |
-| id          | INT UNSIGNED PK    | Auto-increment        |
-| name        | VARCHAR(50) UNIQUE | e.g. Running, Walking |
-| description | VARCHAR(255) NULL  | Optional description  |
+Weather data is not stored.
 
-### 4.3 `workouts`
 
-Individual workout sessions per user.
 
-| Column           | Type                               | Notes                     |
-| ---------------- | ---------------------------------- | ------------------------- |
-| id               | INT UNSIGNED PK                    | Auto-increment            |
-| user_id          | INT UNSIGNED FK → users.id         | Owner                     |
-| workout_type_id  | INT UNSIGNED FK → workout_types.id | Type of workout           |
-| workout_date     | DATE                               | Date of the workout       |
-| duration_minutes | INT UNSIGNED                       | Duration in minutes       |
-| intensity        | ENUM('low','medium','high')        | Default `'medium'`        |
-| notes            | VARCHAR(500) NULL                  | Optional notes            |
-| created_at       | DATETIME                           | Default current timestamp |
+## Environment variables
 
-Index: `(user_id, workout_date)` for faster per-user queries.
+Copy `.env.example` to `.env` and edit:
 
-### 4.4 `metric_types`
-
-Lookup table for different health metrics.
-
-| Column       | Type               | Notes                       |
-| ------------ | ------------------ | --------------------------- |
-| id           | INT UNSIGNED PK    | Auto-increment              |
-| name         | VARCHAR(50) UNIQUE | e.g. Weight, Blood Pressure |
-| default_unit | VARCHAR(20)        | e.g. kg, mmHg, bpm          |
-| description  | VARCHAR(255) NULL  | Optional description        |
-
-### 4.5 `metrics`
-
-Individual health metric entries per user.
-
-| Column         | Type                              | Notes                                 |
-| -------------- | --------------------------------- | ------------------------------------- |
-| id             | INT UNSIGNED PK                   | Auto-increment                        |
-| user_id        | INT UNSIGNED FK → users.id        | Owner                                 |
-| metric_type_id | INT UNSIGNED FK → metric_types.id | Type                                  |
-| metric_date    | DATE                              | Date of measurement                   |
-| value          | DECIMAL(10,2)                     | Numeric value                         |
-| unit           | VARCHAR(20) NULL                  | Optional override (else default_unit) |
-| notes          | VARCHAR(500) NULL                 | Optional notes                        |
-| created_at     | DATETIME                          | Default current timestamp             |
-
-Index: `(user_id, metric_date)`.
-
-### 4.6 `login_audit`
-
-Logging login attempts (used on the admin dashboard).
-
-| Column           | Type                       | Notes                         |
-| ---------------- | -------------------------- | ----------------------------- |
-| id               | INT UNSIGNED PK            | Auto-increment                |
-| user_id          | INT UNSIGNED FK → users.id | May be NULL for unknown users |
-| username_attempt | VARCHAR(50) NULL           | Username attempted            |
-| success          | TINYINT(1)                 | 1 = success, 0 = failure      |
-| ip_address       | VARCHAR(45) NULL           | IPv4/IPv6                     |
-| user_agent       | VARCHAR(255) NULL          | Browser / client string       |
-| attempted_at     | DATETIME                   | Default current timestamp     |
-
-> Weather data is retrieved live from the OpenWeatherMap API and **not** stored in the database.
-
-## 5. Database setup scripts
-
-### 5.1 `create_db.sql` (summary)
-
-* Drops and recreates the `health_app` database.
-* Defines tables: `users`, `workout_types`, `workouts`, `metric_types`, `metrics`, `login_audit`.
-* Adds indexes and foreign keys.
-* Optionally creates a **dedicated MySQL user** for the app:
-
-```sql
--- Optional: create dedicated MySQL user for the app (run as root / admin)
-CREATE USER IF NOT EXISTS 'health_app'@'localhost' IDENTIFIED BY 'qwertyuiop';
-
-GRANT SELECT, INSERT, UPDATE, DELETE
-ON health_app.* TO 'health_app'@'localhost';
-```
-
-> In development, the app is configured to connect using this `health_app` MySQL user.
-
-### 5.2 `insert_test_data.sql` (summary)
-
-* Uses the `health_app` database.
-* Inserts:
-
-  * One **admin user** (for marking).
-  * Basic workout types and metric types.
-  * A small number of sample workouts, metrics, and login audit entries for that user.
-
-#### Default admin user
-
-> All other pre-inserted users were removed – only this admin user is created by `insert_test_data.sql`.
-
-| username | role  | email                                         | password |
-| -------- | ----- | --------------------------------------------- | -------- |
-| gold     | admin | [gru001@gold.ac.uk](mailto:gru001@gold.ac.uk) | `smiths` |
-
-The script inserts the **bcrypt hash** for `"smiths"` into `users.password_hash`.
-Markers can also create additional **user** accounts via the registration form.
-
-## 6. Environment variables
-
-`.env.example`:
-
-```bash
+```env
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=health_app
 DB_PASSWORD=qwertyuiop
 DB_NAME=health_app
 
-SESSION_SECRET=change_this_in_real_env
+SESSION_SECRET=change_this
 
-# Weather feature (OpenWeatherMap)
-OPENWEATHER_API_KEY=your_openweathermap_api_key_here
+OPENWEATHER_API_KEY=your_openweathermap_api_key
 ```
 
-Steps:
+`.env` is not committed to the repo.
 
-1. Copy it to `.env`:
 
-   ```bash
-   cp .env.example .env
-   ```
 
-2. Adjust values if needed (e.g. different DB user/password, stronger `SESSION_SECRET`).
+## Setup and running
 
-3. (Optional but recommended) Sign up at OpenWeatherMap and set a real value for `OPENWEATHER_API_KEY`.
-   If no key is provided, the `/weather` page will show a clear message explaining that weather is not configured.
-
-The `.env` file is **not committed** to the repository.
-
-## 7. Route design
-
-### Mounted routes (in `index.js`)
-
-```js
-app.use('/', homeRoutes);
-app.use('/auth', authRoutes);
-app.use('/dashboard', dashboardRoutes);
-app.use('/workouts', workoutsRoutes);
-app.use('/metrics', metricsRoutes);
-app.use('/search', searchRoutes);
-app.use('/admin', adminRoutes);
-app.use('/weather', weatherRoutes);
-```
-
-### Key routes (summary)
-
-| Area      | Method | Path                             | Middleware         | Description                                     |
-| --------- | ------ | -------------------------------- | ------------------ | ----------------------------------------------- |
-| Home      | GET    | `/`                              | attachUserToLocals | Landing page                                    |
-| Home      | GET    | `/about`                         | attachUserToLocals | About page                                      |
-| Auth      | GET    | `/auth/register`                 | attachUserToLocals | Show registration form                          |
-| Auth      | POST   | `/auth/register`                 | attachUserToLocals | Register user (validation + bcrypt)             |
-| Auth      | GET    | `/auth/login`                    | attachUserToLocals | Show login form                                 |
-| Auth      | POST   | `/auth/login`                    | attachUserToLocals | Authenticate, set session, log to `login_audit` |
-| Auth      | GET    | `/auth/logout`                   | requireLogin       | Clear session user & redirect to `/`            |
-| Dashboard | GET    | `/dashboard`                     | requireLogin       | User dashboard (recent data + stats)            |
-| Workouts  | GET    | `/workouts`                      | requireLogin       | List workouts + filters                         |
-| Workouts  | GET    | `/workouts/add`                  | requireLogin       | Add workout form                                |
-| Workouts  | POST   | `/workouts/add`                  | requireLogin       | Insert workout                                  |
-| Workouts  | GET    | `/workouts/:id/edit`             | requireLogin       | Edit own workout                                |
-| Workouts  | POST   | `/workouts/:id/edit`             | requireLogin       | Update workout                                  |
-| Workouts  | POST   | `/workouts/:id/delete`           | requireLogin       | Delete workout                                  |
-| Metrics   | GET    | `/metrics`                       | requireLogin       | List metrics + filters                          |
-| Metrics   | GET    | `/metrics/add`                   | requireLogin       | Add metric form                                 |
-| Metrics   | POST   | `/metrics/add`                   | requireLogin       | Insert metric                                   |
-| Metrics   | GET    | `/metrics/:id/edit`              | requireLogin       | Edit own metric                                 |
-| Metrics   | POST   | `/metrics/:id/edit`              | requireLogin       | Update metric                                   |
-| Metrics   | POST   | `/metrics/:id/delete`            | requireLogin       | Delete metric                                   |
-| Search    | GET    | `/search`                        | requireLogin       | Search form                                     |
-| Search    | GET    | `/search/results`                | requireLogin       | Search results across workouts/metrics          |
-| Admin     | GET    | `/admin`                         | requireAdmin       | Admin dashboard (stats + users + login audit)   |
-| Admin     | POST   | `/admin/users/:id/role`          | requireAdmin       | Change user role                                |
-| Admin     | POST   | `/admin/users/:id/toggle-active` | requireAdmin       | Activate / deactivate user                      |
-| Weather   | GET    | `/weather`                       | (optional login)   | Weather form + current weather for a city       |
-
-> The `/weather` route can either be open to all users or wrapped in `requireLogin` depending on configuration. It uses the OpenWeatherMap API and shows friendly error messages when something goes wrong.
-
-## 8. Middleware
-
-Defined in `_middleware.js`:
-
-* **`requireLogin`**
-
-  * Redirects unauthenticated users to `/auth/login`.
-  * Used on routes that require a logged-in user.
-
-* **`requireAdmin`**
-
-  * Checks that `req.session.user` exists and `role === 'admin'`.
-  * Otherwise responds with **403** (or redirects).
-
-* **`attachUserToLocals`**
-
-  * Makes the current user available as `currentUser` in all views.
-  * Also attaches `success` and `error` flash messages for `_flash.ejs`.
-
-## 9. Setup & run
-
-### Prerequisites
-
-* Node.js **18+**
-* MySQL **8+**
-* A MySQL user with permission to run `create_db.sql` and `insert_test_data.sql` once.
-* (Optional) An OpenWeatherMap API key if you want the weather feature to be fully functional.
-
-### Steps
-
-1. **Clone the repo**
-
-   ```bash
-   git clone <your-repo-url>.git
-   cd 10_health_33724876
-   ```
-
-2. **Install dependencies**
+1. Install dependencies:
 
    ```bash
    npm install
    ```
 
-3. **Create database & app user**
-
-   Log into MySQL as root (or another admin), then run:
+2. Create database and seed data in MySQL:
 
    ```sql
    SOURCE create_db.sql;
    SOURCE insert_test_data.sql;
    ```
 
-4. **Configure environment**
+3. Create `.env`:
 
    ```bash
    cp .env.example .env
-   # Edit .env if needed (DB credentials, SESSION_SECRET, OPENWEATHER_API_KEY, etc.)
+   # then edit values
    ```
 
-5. **Run the app**
+4. Start the app:
 
    ```bash
    npm start
-   # or: node index.js
+   # or
+   node index.js
    ```
 
-6. **Log in as admin**
+5. Open in browser (default):
 
-   Use the pre-seeded admin user:
+   * Home: `http://localhost:3000/`
+   * Register / login: `/auth/register`, `/auth/login`
+   * Dashboard: `/dashboard`
+   * Admin (with admin user): `/admin`
 
-   * **Username:** `gold`
-   * **Email:** `gru001@gold.ac.uk`
-   * **Password:** `smiths`
 
-   You can then:
 
-   * Access `/admin` to see the admin panel.
-   * Register new normal users through `/auth/register`.
-   * Open `/weather` to test the weather feature (with a valid `OPENWEATHER_API_KEY`).
+## Tests
+
+Tests are in `app.test.js` and cover:
+
+* Public routes: `/`, `/about`, `/auth/register`, `/auth/login`
+* Basic validation errors for login / register
+* Redirect behaviour on protected routes when not logged in
+* Weather route responses
+
+Run:
+
+```bash
+npm test
+```
 

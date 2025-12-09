@@ -92,7 +92,13 @@ app.use((err, req, res, next) => {
   res.render("error_500");
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Health app listening on http://localhost:${PORT}`);
-});
+// Only start the HTTP server when running this file directly.
+// When required from tests, we just export `app`.
+if (require.main === module) {
+  const PORT = process.env.PORT || 8000;
+  app.listen(PORT, () => {
+    console.log(`Health app listening on http://localhost:${PORT}`);
+  });
+}
+// Export the Express app for testing with supertest
+module.exports = app;

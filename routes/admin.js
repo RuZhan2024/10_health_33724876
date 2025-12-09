@@ -1,24 +1,25 @@
-// routes/admin.js
 const express = require('express');
 const pool = require('../db');
 const { requireAdmin } = require('./_middleware');
 
 const router = express.Router();
 
+/**
+ * Format a Date or string as "YYYY-MM-DD HH:MM:SS" for display.
+ */
 function formatDateTime(dt) {
   if (!dt) return '';
   if (typeof dt === 'string') return dt.replace('T', ' ').slice(0, 19);
-  // Date object
+  // Handle Date objects from MySQL driver.
   return dt.toISOString().replace('T', ' ').slice(0, 19);
 }
 
 /**
- * GET /admin
- * Admin dashboard – site stats, users list, recent logins.
+ * Admin dashboard with site-wide stats, users, and recent login attempts.
  */
 router.get('/', requireAdmin, async (req, res) => {
   try {
-    // 1) Overall site stats
+    // Site-level aggregates (user counts, activity counts, etc.)
     const [statsRows] = await pool.query(`
       SELECT
         (SELECT COUNT(*) FROM users) AS total_users,
@@ -44,31 +45,33 @@ router.get('/', requireAdmin, async (req, res) => {
       metrics_last7: 0
     };
 
-    // 2) Users with workout / metric counts
-    const [usersRows] = await pool.query(`
-      SELECT
-        u.id,
-        u.username,
-        u.email,
-        u.role,
-        u.is_active,
-        u.created_at,
-        u.last_login,
-        COALESCE(w.workout_count, 0) AS workout_count,
-        COALESCE(m.metric_count, 0) AS metric_count
-      FROM users u
-      LEFT JOIN (
-        SELECT user_id, COUNT(*) AS workout_count
-        FROM workouts
-        GROUP BY user_id
-      ) w ON u.id = w.user_id
-      LEFT JOIN (
-        SELECT user_id, COUNT(*) AS metric_count
-        FROM metrics
-        GROUP BY user_id
-      ) m ON u.id = m.user_id
-      ORDER BY u.created_at ASC, u.username ASC
-    `);
+    // Load users along with how many workouts and metrics each one has.
+const [usersRows] = await pool.query(`
+  SELECT
+    u.id,                              -- user id
+    u.username,                        -- username shown in the app
+    u.email,                           -- contact email
+    u.role,                            -- "user" or "admin"
+    u.is_active,                       -- 1 = active, 0 = deactivated
+    u.created_at,                      -- when the account was created
+    u.last_login,                      -- last time the user logged in
+    COALESCE(w.workout_count, 0) AS workout_count,  -- total workouts for this user
+    COALESCE(m.metric_count, 0) AS metric_count     -- total metrics for this user
+  FROM users u
+  LEFT JOIN (
+    -- Aggregate workouts per user
+    SELECT user_id, COUNT(*) AS workout_count
+    FROM workouts
+    GROUP BY user_id
+  ) w ON u.id = w.user_id
+  LEFT JOIN (
+    -- Aggregate metrics per user
+    SELECT user_id, COUNT(*) AS metric_count
+    FROM metrics
+    GROUP BY user_id
+  ) m ON u.id = m.user_id
+  ORDER BY u.created_at ASC, u.username ASC   -- show oldest accounts first
+`);
 
     const users = usersRows.map(u => ({
       ...u,
@@ -76,7 +79,7 @@ router.get('/', requireAdmin, async (req, res) => {
       last_login_str: u.last_login ? formatDateTime(u.last_login) : 'Never'
     }));
 
-    // 3) Recent login attempts (from login_audit)
+    // Most recent login attempts from the audit table.
     const [loginRows] = await pool.query(`
       SELECT
         la.id,
@@ -111,8 +114,7 @@ router.get('/', requireAdmin, async (req, res) => {
 });
 
 /**
- * POST /admin/users/:id/role
- * Change a user's role (user ↔ admin).
+ * Promote or demote a user to/from admin.
  */
 router.post('/users/:id/role', requireAdmin, async (req, res) => {
   const targetUserId = req.params.id;
@@ -124,7 +126,7 @@ router.post('/users/:id/role', requireAdmin, async (req, res) => {
     return res.redirect('/admin');
   }
 
-  // Optional: prevent admin from demoting themselves away from admin
+  // Prevent an admin from accidentally removing their own admin rights.
   if (String(targetUserId) === String(currentAdminId) && newRole !== 'admin') {
     req.flash('error', 'You cannot remove your own admin role.');
     return res.redirect('/admin');
@@ -149,21 +151,20 @@ router.post('/users/:id/role', requireAdmin, async (req, res) => {
 });
 
 /**
- * POST /admin/users/:id/toggle-active
- * Activate / deactivate a user.
+ * Activate or deactivate a user account.
  */
 router.post('/users/:id/toggle-active', requireAdmin, async (req, res) => {
   const targetUserId = req.params.id;
   const currentAdminId = req.session.user.id;
 
-  // Optional: block deactivating yourself
+  // Do not allow an admin to deactivate themselves.
   if (String(targetUserId) === String(currentAdminId)) {
     req.flash('error', 'You cannot deactivate your own account.');
     return res.redirect('/admin');
   }
 
   try {
-    // Flip is_active 0 ↔ 1
+    // Flip is_active between 0 and 1.
     const [result] = await pool.query(
       'UPDATE users SET is_active = 1 - is_active WHERE id = ?',
       [targetUserId]

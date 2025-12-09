@@ -1,4 +1,3 @@
-// routes/workouts.js
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const pool = require('../db');
@@ -6,6 +5,9 @@ const { requireLogin } = require('./_middleware');
 
 const router = express.Router();
 
+/**
+ * Format a Date (or date string) as YYYY-MM-DD.
+ */
 function formatDate(date) {
   if (!date) return '';
   if (typeof date === 'string') return date.slice(0, 10);
@@ -13,8 +15,7 @@ function formatDate(date) {
 }
 
 /**
- * GET /workouts
- * List workouts for current user, with optional filters.
+ * List workouts for the current user with optional filters.
  */
 router.get('/', requireLogin, async (req, res) => {
   const userId = req.session.user.id;
@@ -23,7 +24,7 @@ router.get('/', requireLogin, async (req, res) => {
   const toDate = req.query.to || '';
 
   try {
-    // Load workout types for filter dropdown
+    // Load workout types for the filter dropdown and forms.
     const [workoutTypes] = await pool.query(
       'SELECT id, name FROM workout_types ORDER BY name ASC'
     );
@@ -86,8 +87,7 @@ router.get('/', requireLogin, async (req, res) => {
 });
 
 /**
- * GET /workouts/add
- * Show form to add a new workout.
+ * Show the form to add a new workout.
  */
 router.get('/add', requireLogin, async (req, res) => {
   try {
@@ -116,8 +116,7 @@ router.get('/add', requireLogin, async (req, res) => {
 });
 
 /**
- * POST /workouts/add
- * Handle create workout.
+ * Validate and create a new workout.
  */
 router.post(
   '/add',
@@ -162,6 +161,7 @@ router.post(
       );
 
       if (!errors.isEmpty()) {
+        // Display validation messages and keep user input on the form.
         return res.status(422).render('workouts/form', {
           pageTitle: 'Add Workout',
           formTitle: 'Add Workout',
@@ -198,8 +198,7 @@ router.post(
 );
 
 /**
- * GET /workouts/:id/edit
- * Show edit form for an existing workout (owned by the current user).
+ * Show the edit form for a workout owned by the current user.
  */
 router.get('/:id/edit', requireLogin, async (req, res) => {
   const userId = req.session.user.id;
@@ -217,6 +216,7 @@ router.get('/:id/edit', requireLogin, async (req, res) => {
     );
 
     if (rows.length === 0) {
+      // Not found or not owned by this user.
       return res.status(404).render('error_404');
     }
 
@@ -250,8 +250,7 @@ router.get('/:id/edit', requireLogin, async (req, res) => {
 });
 
 /**
- * POST /workouts/:id/edit
- * Handle update for an existing workout.
+ * Validate and update an existing workout.
  */
 router.post(
   '/:id/edit',
@@ -330,6 +329,7 @@ router.post(
       );
 
       if (result.affectedRows === 0) {
+        // The row was not updated, likely because it does not exist or is not owned.
         return res.status(404).render('error_404');
       }
 
@@ -343,8 +343,7 @@ router.post(
 );
 
 /**
- * POST /workouts/:id/delete
- * Delete a workout owned by the current user.
+ * Delete a workout for the current user.
  */
 router.post('/:id/delete', requireLogin, async (req, res) => {
   const userId = req.session.user.id;

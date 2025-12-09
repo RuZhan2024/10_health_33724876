@@ -1,137 +1,138 @@
-// routes/auth.js
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const bcrypt = require('bcrypt');
-const pool = require('../db');
-const { requireLogin } = require('./_middleware');
+const express = require("express");
+const { body, validationResult } = require("express-validator");
+const bcrypt = require("bcrypt");
+const pool = require("../db");
+const { requireLogin } = require("./_middleware");
 
 const router = express.Router();
 
 /**
- * GET /auth/register
+ * Show the registration form.
  */
-router.get('/register', (req, res) => {
-  res.render('auth/register', {
-    pageTitle: 'Register',
+router.get("/register", (req, res) => {
+  res.render("auth/register", {
+    pageTitle: "Register",
     errors: {},
-    oldInput: { username: '', email: '' }
+    oldInput: { username: "", email: "" },
   });
 });
 
 /**
- * POST /auth/register
+ * Validate and create a new user.
  */
 router.post(
-  '/register',
+  "/register",
   [
-    body('username')
+    body("username")
       .trim()
       .isLength({ min: 3, max: 20 })
-      .withMessage('Username must be between 3 and 20 characters.')
+      .withMessage("Username must be between 3 and 20 characters.")
       .matches(/^[A-Za-z0-9_]+$/)
-      .withMessage('Username can only contain letters, numbers, and underscores.'),
-    body('email')
+      .withMessage(
+        "Username can only contain letters, numbers, and underscores."
+      ),
+    body("email")
       .trim()
       .isEmail()
-      .withMessage('Please enter a valid email address.')
+      .withMessage("Please enter a valid email address.")
       .normalizeEmail(),
-    body('password')
+    body("password")
       .isLength({ min: 8 })
-      .withMessage('Password must be at least 8 characters long.'),
-    body('confirm_password')
-      .custom((value, { req }) => {
-        if (value !== req.body.password) {
-          throw new Error('Passwords do not match.');
-        }
-        return true;
-      })
+      .withMessage("Password must be at least 8 characters long."),
+    body("confirm_password").custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Passwords do not match.");
+      }
+      return true;
+    }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
     const { username, email, password } = req.body;
 
     if (!errors.isEmpty()) {
-      return res.status(422).render('auth/register', {
-        pageTitle: 'Register',
+      // Show validation messages and keep the fields the user already filled.
+      return res.status(422).render("auth/register", {
+        pageTitle: "Register",
         errors: errors.mapped(),
-        oldInput: { username, email }
+        oldInput: { username, email },
       });
     }
 
     try {
-      // Check if username/email already exists
+      // Check if there is already a user with this username or email.
       const [existing] = await pool.query(
-        'SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1',
+        "SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1",
         [username, email]
       );
 
       if (existing.length > 0) {
-        return res.status(422).render('auth/register', {
-          pageTitle: 'Register',
+        return res.status(422).render("auth/register", {
+          pageTitle: "Register",
           errors: {
-            username: { msg: 'Username or email already in use.' }
+            username: { msg: "Username or email already in use." },
           },
-          oldInput: { username, email }
+          oldInput: { username, email },
         });
       }
 
+      // Hash the password before storing it.
       const hash = await bcrypt.hash(password, 10);
 
       await pool.query(
-        'INSERT INTO users (username, email, password_hash, role, is_active) VALUES (?,?,?,?,1)',
-        [username, email, hash, 'user']
+        "INSERT INTO users (username, email, password_hash, role, is_active) VALUES (?,?,?,?,1)",
+        [username, email, hash, "user"]
       );
 
-      req.flash('success', 'Registration successful. Please log in.');
-      res.redirect('/auth/login');
+      req.flash("success", "Registration successful. Please log in.");
+      res.redirect("/auth/login");
     } catch (err) {
       console.error(err);
-      res.status(500).render('error_500');
+      res.status(500).render("error_500");
     }
   }
 );
 
 /**
- * GET /auth/login
+ * Show the login form.
  */
-router.get('/login', (req, res) => {
-  res.render('auth/login', {
-    pageTitle: 'Login',
+router.get("/login", (req, res) => {
+  res.render("auth/login", {
+    pageTitle: "Login",
     errors: {},
-    oldInput: { identifier: '' }
+    oldInput: { identifier: "" },
   });
 });
 
 /**
- * POST /auth/login
+ * Validate credentials and create a session if login is successful.
  */
 router.post(
-  '/login',
+  "/login",
   [
-    body('identifier')
+    body("identifier")
       .trim()
       .notEmpty()
-      .withMessage('Please enter your username or email.'),
-    body('password')
-      .notEmpty()
-      .withMessage('Please enter your password.')
+      .withMessage("Please enter your username or email."),
+    body("password").notEmpty().withMessage("Please enter your password."),
   ],
   async (req, res) => {
     const errors = validationResult(req);
     const { identifier, password } = req.body;
 
     if (!errors.isEmpty()) {
-      return res.status(422).render('auth/login', {
-        pageTitle: 'Login',
+      return res.status(422).render("auth/login", {
+        pageTitle: "Login",
         errors: errors.mapped(),
-        oldInput: { identifier }
+        oldInput: { identifier },
       });
     }
 
     let user = null;
     try {
+      // Look up the user by username or email (only active accounts).
       const [rows] = await pool.query(
-        'SELECT * FROM users WHERE (username = ? OR email = ?) AND is_active = 1 LIMIT 1',
+        "SELECT * FROM users WHERE (username = ? OR email = ?) AND is_active = 1 LIMIT 1",
         [identifier, identifier]
       );
 
@@ -139,117 +140,119 @@ router.post(
         user = rows[0];
       }
 
+      // We log IP and user agent for the login audit table.
       const ip = req.ip || null;
-      const ua = req.get('User-Agent') || null;
+      const ua = req.get("User-Agent") || null;
 
       if (!user) {
-        // Log failed attempt
+        // If no user is found, record a failed login attempt.
         await pool.query(
-          'INSERT INTO login_audit (user_id, username_attempt, success, ip_address, user_agent) VALUES (NULL, ?, 0, ?, ?)',
+          "INSERT INTO login_audit (user_id, username_attempt, success, ip_address, user_agent) VALUES (NULL, ?, 0, ?, ?)",
           [identifier, ip, ua]
         );
 
-        return res.status(401).render('auth/login', {
-          pageTitle: 'Login',
+        return res.status(401).render("auth/login", {
+          pageTitle: "Login",
           errors: {
-            identifier: { msg: 'Invalid username/email or password.' }
+            identifier: { msg: "Invalid username/email or password." },
           },
-          oldInput: { identifier }
+          oldInput: { identifier },
         });
       }
 
       const passwordMatch = await bcrypt.compare(password, user.password_hash);
       if (!passwordMatch) {
+        // Record failed attempt with a valid user id.
         await pool.query(
-          'INSERT INTO login_audit (user_id, username_attempt, success, ip_address, user_agent) VALUES (?, ?, 0, ?, ?)',
+          "INSERT INTO login_audit (user_id, username_attempt, success, ip_address, user_agent) VALUES (?, ?, 0, ?, ?)",
           [user.id, identifier, ip, ua]
         );
 
-        return res.status(401).render('auth/login', {
-          pageTitle: 'Login',
+        return res.status(401).render("auth/login", {
+          pageTitle: "Login",
           errors: {
-            identifier: { msg: 'Invalid username/email or password.' }
+            identifier: { msg: "Invalid username/email or password." },
           },
-          oldInput: { identifier }
+          oldInput: { identifier },
         });
       }
 
-      // Successful login
-      await pool.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+      // At this point, the login is successful.
+
+      await pool.query("UPDATE users SET last_login = NOW() WHERE id = ?", [
+        user.id,
+      ]);
 
       await pool.query(
-        'INSERT INTO login_audit (user_id, username_attempt, success, ip_address, user_agent) VALUES (?, ?, 1, ?, ?)',
+        "INSERT INTO login_audit (user_id, username_attempt, success, ip_address, user_agent) VALUES (?, ?, 1, ?, ?)",
         [user.id, identifier, ip, ua]
       );
 
+      // Store a minimal user object in the session.
       req.session.user = {
         id: user.id,
         username: user.username,
-        role: user.role
+        role: user.role,
       };
 
-      req.flash('success', 'You are now logged in.');
-      res.redirect('/dashboard');
+      req.flash("success", "You are now logged in.");
+      res.redirect("/dashboard");
     } catch (err) {
       console.error(err);
-      res.status(500).render('error_500');
+      res.status(500).render("error_500");
     }
   }
 );
 
 /**
- * GET /auth/logout
+ * Destroy the current session and log the user out.
  */
-router.get('/logout', requireLogin, (req, res) => {
-  req.session.regenerate(err => {
+router.get("/logout", requireLogin, (req, res) => {
+  // Regenerate clears the session id and the contents.
+  req.session.regenerate((err) => {
     if (err) {
       console.error(err);
-      return res.status(500).render('error_500');
+      return res.status(500).render("error_500");
     }
 
-    // Now we have a fresh empty session:
-    req.flash('success', 'You have been logged out.');
-    res.redirect('/');
+    req.flash("success", "You have been logged out.");
+    res.redirect("/");
   });
 });
 
-
-// Show a confirmation page so users don't delete by accident.
-router.get('/delete-account', requireLogin, (req, res) => {
-  res.render('auth/delete_account', {
-    pageTitle: 'Delete My Account'
+/**
+ * Show a confirmation page before deleting the account.
+ */
+router.get("/delete-account", requireLogin, (req, res) => {
+  res.render("auth/delete_account", {
+    pageTitle: "Delete My Account",
   });
 });
 
-// Delete the logged-in user's account and related data.
-router.post('/delete-account', requireLogin, async (req, res) => {
+/**
+ * Delete the logged-in user's account and any related data.
+ */
+router.post("/delete-account", requireLogin, async (req, res) => {
   const userId = req.session.user.id;
 
   try {
-    // Delete the user row.
-    // Because of ON DELETE CASCADE, workouts and metrics
-    // for this user will be removed automatically.
-    await pool.query('DELETE FROM users WHERE id = ?', [userId]);
+    // Removing the user row will also remove related rows via ON DELETE CASCADE.
+    await pool.query("DELETE FROM users WHERE id = ?", [userId]);
 
-    // Clear the session (similar pattern to /auth/logout)
-    req.session.regenerate(err => {
+    // Clear the session in the same way as the logout route.
+    req.session.regenerate((err) => {
       if (err) {
         console.error(err);
-        return res.status(500).render('error_500');
+        return res.status(500).render("error_500");
       }
 
-      req.flash(
-        'success',
-        'Your account and related data have been deleted.'
-      );
-      res.redirect('/');
+      req.flash("success", "Your account and related data have been deleted.");
+      res.redirect("/");
     });
   } catch (err) {
     console.error(err);
-    res.status(500).render('error_500');
+    res.status(500).render("error_500");
   }
 });
-
-
 
 module.exports = router;

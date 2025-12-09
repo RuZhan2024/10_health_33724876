@@ -1,10 +1,9 @@
-// routes/home.js
 const express = require('express');
 const router = express.Router();
 
 /**
- * GET /
- * Landing page – different message for guests vs logged-in users.
+ * Landing page for the app.
+ * The template decides how to greet logged-in vs guest users.
  */
 router.get('/', (req, res) => {
   res.render('home', {
@@ -13,7 +12,7 @@ router.get('/', (req, res) => {
 });
 
 /**
- * GET /about
+ * Simple static page describing what the app does.
  */
 router.get('/about', (req, res) => {
   res.render('about', {
