@@ -103,12 +103,27 @@ header nav a {
   border-radius: 999px;
   text-decoration: none;
   transition: background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  
 }
 
 header nav a:hover {
   background: rgba(255, 255, 255, 0.16);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  text-decoration: none;
 }
+
+header nav a.delete {
+  padding: 0.35rem 0.75rem;
+  background: transparent;
+  color: red;
+  font-size: 0.9rem;
+}
+
+header nav a.delete:hover {
+  background: rgba(255, 0, 0, 1);       /* full red on hover */
+  color: #ffffff;
+}
+
 
 /* ============================================
    Layout

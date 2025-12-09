@@ -22,6 +22,7 @@
           <a href="/admin">Admin</a>
         <% } %>
         <a href="/auth/logout">Logout (<%= currentUser.username %>)</a>
+        <a class="delete" href="/auth/delete-account">Delete Account</a>
       <% } else { %>
         <a href="/auth/login">Login</a>
         <a href="/auth/register">Register</a>

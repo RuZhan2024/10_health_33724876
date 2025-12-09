@@ -1,0 +1,29 @@
+<%- include('../partials/header', { pageTitle: pageTitle || 'Delete account' }) %>
+
+<section class="account">
+  <h2>Delete your account</h2>
+
+  <p>
+    Hi, <strong><%= currentUser.username %></strong>.
+  </p>
+
+  <p>
+    If you delete your account, your profile, workouts and health metrics
+    will be removed from the system. This action cannot be undone.
+  </p>
+
+  <p>
+    Are you sure you want to continue?
+  </p>
+
+  <form action="/auth/delete-account" method="POST" class="form" style="margin-top: 1rem;">
+    <button type="submit" class="btn">
+      Yes, delete my account
+    </button>
+    <a href="/dashboard" class="btn" style="margin-left: 0.5rem;">
+      Cancel
+    </a>
+  </form>
+</section>
+
+<%- include('../partials/footer') %>
