@@ -85,7 +85,7 @@ router.post(
       );
 
       req.flash("success", "Registration successful. Please log in.");
-      res.redirect("/auth/login");
+      res.redirect("./login");
     } catch (err) {
       console.error(err);
       res.status(500).render("error_500");
@@ -196,7 +196,7 @@ router.post(
       };
 
       req.flash("success", "You are now logged in.");
-      res.redirect("/dashboard");
+      res.redirect("../dashboard");
     } catch (err) {
       console.error(err);
       res.status(500).render("error_500");
@@ -216,7 +216,7 @@ router.get("/logout", requireLogin, (req, res) => {
     }
 
     req.flash("success", "You have been logged out.");
-    res.redirect("/");
+    res.redirect("../");
   });
 });
 

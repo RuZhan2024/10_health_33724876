@@ -12,8 +12,6 @@ Users can:
 - (Admins) View an admin dashboard
 - View current weather via OpenWeatherMap
 
-
-
 ## Features
 
 ### Authentication and accounts
@@ -98,8 +96,6 @@ Users can:
   - Protects against removing your own admin role or deactivating yourself
 - Recent login attempts from `login_audit` (username, success, IP, UA, timestamp)
 
-
-
 ## Tech stack
 
 - Node.js, Express
@@ -112,8 +108,6 @@ Users can:
 - `dotenv`
 - OpenWeatherMap API (via `fetch`)
 - Tests: `mocha`, `supertest`, `chai`
-
-
 
 ## Project structure (simplified)
 
@@ -155,9 +149,7 @@ insert_test_data.sql
 app.test.js        # router / integration tests
 .env.example
 README.md
-````
-
-
+```
 
 ## Database (overview)
 
@@ -165,40 +157,42 @@ Database name (example): `health_app`
 
 Tables:
 
-* `users`
+- `users`
 
-  * username, email (unique)
-  * password_hash
-  * role (`user` / `admin`)
-  * is_active (1/0)
-  * created_at, last_login
-* `workout_types`
-* `workouts`
+  - username, email (unique)
+  - password_hash
+  - role (`user` / `admin`)
+  - is_active (1/0)
+  - created_at, last_login
 
-  * user_id, workout_type_id
-  * workout_date
-  * duration_minutes
-  * intensity
-  * notes
-* `metric_types`
+- `workout_types`
+- `workouts`
 
-  * default_unit
-* `metrics`
+  - user_id, workout_type_id
+  - workout_date
+  - duration_minutes
+  - intensity
+  - notes
 
-  * user_id, metric_type_id
-  * metric_date
-  * value, unit
-  * notes
-* `login_audit`
+- `metric_types`
 
-  * user_id (nullable), username_attempt
-  * success (1/0)
-  * ip_address, user_agent
-  * attempted_at
+  - default_unit
+
+- `metrics`
+
+  - user_id, metric_type_id
+  - metric_date
+  - value, unit
+  - notes
+
+- `login_audit`
+
+  - user_id (nullable), username_attempt
+  - success (1/0)
+  - ip_address, user_agent
+  - attempted_at
 
 Weather data is not stored.
-
-
 
 ## Environment variables
 
@@ -218,8 +212,6 @@ OPENWEATHER_API_KEY=your_openweathermap_api_key
 
 `.env` is not committed to the repo.
 
-
-
 ## Setup and running
 
 1. Install dependencies:
@@ -235,12 +227,22 @@ OPENWEATHER_API_KEY=your_openweathermap_api_key
    SOURCE insert_test_data.sql;
    ```
 
+   In the VM
+
+   ```
+   sudo apt-get update
+   sudo apt-get install mysql-server
+   sudo mysql
+   source create_db.sql;
+   source insert_test_data.sql;
+   ```
+
 3. Create `.env`:
 
-   ```bash
-   cp .env.example .env
-   # then edit values
-   ```
+```bash
+cp .env.example .env
+# then edit values
+````
 
 4. Start the app:
 
@@ -252,25 +254,22 @@ OPENWEATHER_API_KEY=your_openweathermap_api_key
 
 5. Open in browser (default):
 
-   * Home: `http://localhost:3000/`
-   * Register / login: `/auth/register`, `/auth/login`
-   * Dashboard: `/dashboard`
-   * Admin (with admin user): `/admin`
-
-
+   - Home: `http://localhost:3000/`
+   - Register / login: `/auth/register`, `/auth/login`
+   - Dashboard: `/dashboard`
+   - Admin (with admin user): `/admin`
 
 ## Tests
 
 Tests are in `app.test.js` and cover:
 
-* Public routes: `/`, `/about`, `/auth/register`, `/auth/login`
-* Basic validation errors for login / register
-* Redirect behaviour on protected routes when not logged in
-* Weather route responses
+- Public routes: `/`, `/about`, `/auth/register`, `/auth/login`
+- Basic validation errors for login / register
+- Redirect behaviour on protected routes when not logged in
+- Weather route responses
 
 Run:
 
 ```bash
 npm test
 ```
-
