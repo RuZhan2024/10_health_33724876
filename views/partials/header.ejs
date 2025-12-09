@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title><%= pageTitle || 'Health App' %></title>
-  <link rel="stylesheet" href="/main.css">
-</head>
-<body>
-  <% const user = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : null; %>
-  <header>
-    <h1>Health App</h1>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/weather">Weather</a>
-      <a href="/about">About</a>
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= pageTitle || 'Health App' %></title>
+    <link rel="stylesheet" href="/main.css" />
+  </head>
+  <body>
+    <% const user = (typeof currentUser !== 'undefined' && currentUser) ?
+    currentUser : null; %>
+    <header>
+      <h1>Health App</h1>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/weather">Weather</a>
+        <a href="/about">About</a>
 
-      <% if (user) { %>
+        <% if (user) { %>
         <a href="/dashboard">Dashboard</a>
         <a href="/workouts">Workouts</a>
         <a href="/metrics">Metrics</a>
         <a href="/search">Search</a>
         <% if (user.role === 'admin') { %>
-          <a href="/admin">Admin</a>
+        <a href="/admin">Admin</a>
         <% } %>
         <a href="/auth/logout">Logout (<%= user.username %>)</a>
+        <% if (user.role !== 'admin') { %>
         <a class="delete" href="/auth/delete-account">Delete Account</a>
-      <% } else { %>
+        <% } %> <% } else { %>
         <a href="/auth/login">Login</a>
         <a href="/auth/register">Register</a>
-      <% } %>
-    </nav>
-  </header>
+        <% } %>
+      </nav>
+    </header>
 
-  <main>
-    <%- include('./_flash'); %>
+    <main><%- include('./_flash'); %></main>
+  </body>
+</html>
