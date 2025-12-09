@@ -1,15 +1,21 @@
-<% if (successMessages && successMessages.length) { %>
+<% 
+  const success = (typeof successMessages !== 'undefined' && successMessages) ? successMessages : [];
+  const errors = (typeof errorMessages !== 'undefined' && errorMessages) ? errorMessages : [];
+%>
+
+<% if (success.length) { %>
   <div class="flash flash-success">
-    <% successMessages.forEach(msg => { %>
+    <% success.forEach(msg => { %>
       <p><%= msg %></p>
     <% }) %>
   </div>
 <% } %>
 
-<% if (errorMessages && errorMessages.length) { %>
+<% if (errors.length) { %>
   <div class="flash flash-error">
-    <% errorMessages.forEach(msg => { %>
+    <% errors.forEach(msg => { %>
       <p><%= msg %></p>
     <% }) %>
   </div>
 <% } %>
+

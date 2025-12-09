@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="/main.css">
 </head>
 <body>
+  <% const user = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : null; %>
   <header>
     <h1>Health App</h1>
     <nav>
@@ -13,15 +14,15 @@
       <a href="/weather">Weather</a>
       <a href="/about">About</a>
 
-      <% if (currentUser) { %>
+      <% if (user) { %>
         <a href="/dashboard">Dashboard</a>
         <a href="/workouts">Workouts</a>
         <a href="/metrics">Metrics</a>
         <a href="/search">Search</a>
-        <% if (currentUser.role === 'admin') { %>
+        <% if (user.role === 'admin') { %>
           <a href="/admin">Admin</a>
         <% } %>
-        <a href="/auth/logout">Logout (<%= currentUser.username %>)</a>
+        <a href="/auth/logout">Logout (<%= user.username %>)</a>
         <a class="delete" href="/auth/delete-account">Delete Account</a>
       <% } else { %>
         <a href="/auth/login">Login</a>
