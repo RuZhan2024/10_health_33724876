@@ -1,4 +1,3 @@
-
 :root {
   --md-primary: #1976d2;
   --md-primary-dark: #0d47a1;
@@ -21,24 +20,20 @@
   --md-radius: 8px;
   --md-radius-large: 12px;
 
-  --md-elev-1: 0 1px 3px rgba(0, 0, 0, 0.12),
-               0 1px 2px rgba(0, 0, 0, 0.24);
-  --md-elev-2: 0 3px 6px rgba(0, 0, 0, 0.16),
-               0 3px 6px rgba(0, 0, 0, 0.23);
-  --md-elev-3: 0 10px 20px rgba(0, 0, 0, 0.19),
-               0 6px 6px rgba(0, 0, 0, 0.23);
+  --md-elev-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --md-elev-2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --md-elev-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
 
-/* ============================================
-   Base
-   ============================================ */
+/* Base */
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto",
+    "Segoe UI", sans-serif;
   background: var(--md-bg);
   color: var(--md-text-primary);
   font-size: 16px;
@@ -59,17 +54,27 @@ a:hover {
   color: var(--md-text-secondary);
 }
 
-.mt-1 { margin-top: 0.25rem; }
-.mt-2 { margin-top: 0.5rem; }
-.mt-3 { margin-top: 1rem; }
+.mt-1 {
+  margin-top: 0.25rem;
+}
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.mt-3 {
+  margin-top: 1rem;
+}
 
-.mb-1 { margin-bottom: 0.25rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-3 { margin-bottom: 1rem; }
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.mb-3 {
+  margin-bottom: 1rem;
+}
 
-/* ============================================
-   App bar / header
-   ============================================ */
+/* App bar/header */
 header {
   position: sticky;
   top: 0;
@@ -102,8 +107,8 @@ header nav a {
   padding: 0.35rem 0.8rem;
   border-radius: 999px;
   text-decoration: none;
-  transition: background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-  
+  transition: background-color 0.15s ease, box-shadow 0.15s ease,
+    opacity 0.15s ease;
 }
 
 header nav a:hover {
@@ -120,14 +125,11 @@ header nav a.delete {
 }
 
 header nav a.delete:hover {
-  background: rgba(255, 0, 0, 1);       /* full red on hover */
+  background: rgba(255, 0, 0, 1); /* full red on hover */
   color: #ffffff;
 }
 
-
-/* ============================================
-   Layout
-   ============================================ */
+/* Layout */
 main {
   max-width: 1200px;
   margin: 1.25rem auto 2.5rem;
@@ -142,9 +144,7 @@ main {
   padding: 1.4rem 1.6rem;
 }
 
-/* ============================================
-   Flash messages (snackbars/toasts)
-   ============================================ */
+/* Flash messages (snackbars/toasts) */
 .flash {
   padding: 0.75rem 1rem;
   border-radius: var(--md-radius-large);
@@ -168,9 +168,7 @@ main {
   border: 1px solid #ffcdd2;
 }
 
-/* ============================================
-   Buttons
-   ============================================ */
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -187,7 +185,8 @@ main {
   letter-spacing: 0.05em;
   cursor: pointer;
   box-shadow: var(--md-elev-1);
-  transition: background-color 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease,
+    transform 0.08s ease;
 }
 
 .btn:hover {
@@ -242,9 +241,7 @@ main {
   width: 100%;
 }
 
-/* ============================================
-   Forms – Material-ish outlined textfields
-   ============================================ */
+/* Forms – Material-ish outlined textfields */
 .form-group {
   margin-bottom: 1.1rem;
 }
@@ -273,7 +270,8 @@ main {
   background: var(--md-surface);
   color: var(--md-text-primary);
   outline: none;
-  transition: border-color 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease,
+    background-color 0.12s ease;
 }
 
 .form-group textarea {
@@ -324,9 +322,7 @@ main {
   margin-top: 0.2rem;
 }
 
-/* ============================================
-   Tables – Material data table style
-   ============================================ */
+/* Tables – Material data table style */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -373,9 +369,7 @@ main {
   background: #ffebee;
 }
 
-/* ============================================
-   Auth pages (cards)
-   ============================================ */
+/* Auth pages (cards) */
 .auth-form {
   max-width: 420px;
   margin: 1.8rem auto;
@@ -392,9 +386,7 @@ main {
   font-weight: 500;
 }
 
-/* ============================================
-   Generic content cards: Home / About / Error
-   ============================================ */
+/* Generic content cards: Home / About / Error */
 .home,
 .about,
 .error-page {
@@ -419,9 +411,7 @@ main {
   color: var(--md-text-secondary);
 }
 
-/* ============================================
-   Dashboard
-   ============================================ */
+/* Dashboard */
 .dashboard {
   display: flex;
   flex-direction: column;
@@ -476,9 +466,7 @@ main {
   box-shadow: var(--md-elev-1);
 }
 
-/* ============================================
-   Workouts & Metrics sections
-   ============================================ */
+/* Workouts & Metrics sections */
 .workouts,
 .metrics {
   background: var(--md-surface);
@@ -511,9 +499,7 @@ main {
   border: 1px solid var(--md-border);
 }
 
-/* ============================================
-   Search pages
-   ============================================ */
+/* Search pages */
 .search-page,
 .search-results-page {
   background: var(--md-surface);
@@ -540,9 +526,7 @@ main {
   margin-top: 1rem;
 }
 
-/* ============================================
-   Admin dashboard
-   ============================================ */
+/* Admin dashboard */
 .admin-dashboard {
   display: flex;
   flex-direction: column;
@@ -606,9 +590,7 @@ main {
   color: var(--md-text-disabled);
 }
 
-/* ============================================
-   Responsive tweaks
-   ============================================ */
+/* Responsive tweaks */
 @media (max-width: 768px) {
   header {
     flex-direction: column;
