@@ -64,9 +64,9 @@ router.get('/', requireLogin, async (req, res) => {
     );
 
     // Pre-format date for display in the template.
-    const metrics = rows.map(m => ({
-      ...m,
-      metric_date_str: formatDate(m.metric_date)
+    const metrics = rows.map(row => ({
+      ...row,
+      metric_date_str: formatDate(row.metric_date)
     }));
 
     res.render('metrics/list', {

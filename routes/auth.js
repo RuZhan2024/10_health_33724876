@@ -140,7 +140,7 @@ router.post(
         user = rows[0];
       }
 
-      // We log IP and user agent for the login audit table.
+      // Log IP and user agent for the login audit table.
       const ip = req.ip || null;
       const ua = req.get("User-Agent") || null;
 

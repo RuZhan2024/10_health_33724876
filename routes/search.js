@@ -31,9 +31,9 @@ router.get('/', requireLogin, (req, res) => {
 /**
  * Perform a search on workouts and/or metrics.
  * Query params:
- *  - scope: "all" | "workouts" | "metrics"
- *  - keyword: text to search in type name or notes
- *  - from / to: date range
+ *   scope: "all" | "workouts" | "metrics"
+ *   keyword: text to search in type name or notes
+ *   from/to: date range
  */
 router.get('/results', requireLogin, async (req, res) => {
   const userId = req.session.user.id;

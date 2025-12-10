@@ -73,10 +73,10 @@ const [usersRows] = await pool.query(`
   ORDER BY u.created_at ASC, u.username ASC   -- show oldest accounts first
 `);
 
-    const users = usersRows.map(u => ({
-      ...u,
-      created_at_str: formatDateTime(u.created_at),
-      last_login_str: u.last_login ? formatDateTime(u.last_login) : 'Never'
+    const users = usersRows.map(userRow => ({
+      ...userRow,
+      created_at_str: formatDateTime(userRow.created_at),
+      last_login_str: u.last_login ? formatDateTime(userRow.last_login) : 'Never'
     }));
 
     // Most recent login attempts from the audit table.
@@ -95,9 +95,9 @@ const [usersRows] = await pool.query(`
       LIMIT 10
     `);
 
-    const recentLogins = loginRows.map(l => ({
-      ...l,
-      attempted_at_str: formatDateTime(l.attempted_at)
+    const recentLogins = loginRows.map(loginRow => ({
+      ...loginRow,
+      attempted_at_str: formatDateTime(loginRow.attempted_at)
     }));
 
     res.render('admin', {

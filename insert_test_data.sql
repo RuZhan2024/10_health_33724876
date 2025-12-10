@@ -5,9 +5,9 @@ USE health_app;
 -- Users
 -- We’ll create one admin account and two normal users for testing.
 -- Passwords (in plain text, for reference):
---   admin : AdminPass123!
---   alice : AlicePass123!
---   bob   : BobPass123!
+--   gold : smiths
+--   alice : 12345678
+--   bob   : 12345678
 INSERT INTO users (username, email, password_hash, role, is_active, created_at, last_login)
 VALUES
   ('gold',  'gru001@gold.ac.uk',
@@ -15,18 +15,17 @@ VALUES
    'admin', 1, '2025-11-10 09:00:00', NULL),
 
   ('alice', 'alice@example.com',
-   '<put a bcrypt hash here>',
+   '$2b$10$kg5z3I5h24BSuc/zYPnK1uUhS0wGAJVnfticA/g9pXqleAw/mB.hW',
    'user', 1, '2025-11-11 09:00:00', NULL),
 
   ('bob',   'bob@example.com',
-   '<put a bcrypt hash here>',
+   '$2b$10$CJJ68SmvJM7m5X7xvqhWy.PXFk6UxSB1uyFOknz1w9OehiAWjkrVy',
    'user', 1, '2025-11-12 09:00:00', NULL);
 
 -- After this insert, MySQL will normally give:
 --   gold  -> id = 1
 --   alice -> id = 2
 --   bob   -> id = 3
--- (unless you already had rows in this table before running the script)
 
 -- Workout types
 -- A few basic types so the workouts table has something to point at.
@@ -65,7 +64,6 @@ VALUES
   ('Steps',         'steps', 'Daily step count'),
   ('Sleep',         'hours', 'Nightly sleep duration');
 
--- Again, IDs are usually 1–5 in the order shown.
 
 -- Metrics
 -- A small set of readings for Alice (user_id = 2) and Bob (user_id = 3).
