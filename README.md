@@ -302,7 +302,7 @@ DB_NAME=health_app
 
 SESSION_SECRET=change_this_in_real_env
 
-OPENWEATHER_API_KEY=your_openweathermap_api_key_here
+OPENWEATHER_API_KEY="You can use your own key, or the key inside the .env file"
 ```
 
 Steps:
@@ -394,7 +394,7 @@ app.use('/weather', weatherRoutes);
 1. Clone the repository:
 
    ```bash
-   git clone <your-repo-url>.git
+   git clone https://github.com/RuZhan2024/10_health_33724876.git
    cd 10_health_33724876
    ```
 
