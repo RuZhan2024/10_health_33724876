@@ -98,7 +98,7 @@ router.get('/add', requireLogin, async (req, res) => {
     res.render('workouts/form', {
       pageTitle: 'Add Workout',
       formTitle: 'Add Workout',
-      formAction: './workouts/add',
+      formAction: '../workouts/add',
       workoutTypes,
       workout: {
         workout_date: '',
@@ -165,7 +165,7 @@ router.post(
         return res.status(422).render('workouts/form', {
           pageTitle: 'Add Workout',
           formTitle: 'Add Workout',
-          formAction: './workouts/add',
+          formAction: '../workouts/add',
           workoutTypes,
           workout: workoutForForm,
           errors: errors.mapped()
