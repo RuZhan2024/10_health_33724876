@@ -44,17 +44,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session store (MySQL)
 const sessionStore = new MySQLStore({
-  host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || "health_app",
-  password: process.env.DB_PASSWORD || "qwertyuiop",
-  database: process.env.DB_NAME || "health_app",
+  host: process.env.HEALTH_HOST || "localhost",
+  port: process.env.HEALTH_DB_PORT || 3306,
+  user: process.env.HEALTH_USER,
+  password: process.env.HEALTH_PASSWORD,
+  database: process.env.HEALTH_DATABASE,
 });
 
 app.use(
   session({
     key: "health_app_sid",
-    secret: process.env.SESSION_SECRET || "change_this_for_real_project",
+    secret: process.env.SESSION_SECRET || "this_should_be_in_env",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,

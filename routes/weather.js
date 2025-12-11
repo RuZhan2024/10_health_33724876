@@ -2,16 +2,14 @@ const express = require("express");
 const router = express.Router();
 const fetch = require("node-fetch");
 
-const API_BASE =
-  process.env.WEATHER_BASE_API ||
-  "https://api.openweathermap.org/data/2.5/weather";
+const API_BASE = "https://api.openweathermap.org/data/2.5/weather";
 
 /**
  * Fetch current weather for a given city from OpenWeather.
  * Returns a small, normalised object with just the fields we care about.
  */
 async function fetchWeatherForCity(city) {
-  const apiKey = process.env.OPENWEATHER_API_KEY;
+  const apiKey = process.env.OPENWEATHER_API_KEY || "b44940e5eda0e721e710cd08b3725ba0";
 
   if (!apiKey) {
     // We use a custom error code so the route can show a helpful message.

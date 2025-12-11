@@ -11,3 +11,5 @@ health_metrics=http://www.doc.gold.ac.uk/usr/122/metrics
 health_metrics_add=http://www.doc.gold.ac.uk/usr/122/metrics/add
 health_search=http://www.doc.gold.ac.uk/usr/122/search
 health_admin=http://www.doc.gold.ac.uk/usr/122/admin
+health_weather=http://www.doc.gold.ac.uk/usr/122/weather
+health_delete=http://www.doc.gold.ac.uk/usr/122/auth/delete-account

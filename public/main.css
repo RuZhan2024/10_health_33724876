@@ -125,7 +125,7 @@ header nav a.delete {
 }
 
 header nav a.delete:hover {
-  background: rgba(255, 0, 0, 1); /* full red on hover */
+  background: rgba(255, 0, 0, 1);
   color: #ffffff;
 }
 

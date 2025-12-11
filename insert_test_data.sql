@@ -1,6 +1,6 @@
 -- insert_test_data.sql – sample data for the Health App
 -- This script should be run after create_db.sql
-USE health_app;
+USE health;
 
 -- Users
 -- We’ll create one admin account and two normal users for testing.

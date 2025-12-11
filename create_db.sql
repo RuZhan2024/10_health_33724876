@@ -1,12 +1,12 @@
 -- create_db.sql – Health Tracking App
 -- You can change 'health_app' below if you want a different database name.
 
-DROP DATABASE IF EXISTS health_app;
-CREATE DATABASE IF NOT EXISTS health_app
+DROP DATABASE IF EXISTS health;
+CREATE DATABASE IF NOT EXISTS health
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE health_app;
+USE health;
 
 -- Users table
 -- Stores login details and basic account info.
@@ -117,9 +117,9 @@ CREATE INDEX idx_login_audit_user_time
 -- MySQL user for the app
 -- Run this part as root/admin in MySQL.
 -- In production you’d probably lock this down to specific privileges.
-CREATE USER IF NOT EXISTS 'health_app'@'localhost' IDENTIFIED BY 'qwertyuiop';
+CREATE USER IF NOT EXISTS 'health'@'localhost' IDENTIFIED BY 'qwertyuiop';
 
-GRANT ALL PRIVILEGES ON health_app.* TO 'health_app'@'localhost';
+GRANT ALL PRIVILEGES ON health.* TO 'health_app'@'localhost';
 FLUSH PRIVILEGES;
 
 -- More restrictive permissions
