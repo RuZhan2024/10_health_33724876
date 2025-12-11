@@ -76,7 +76,7 @@ const [usersRows] = await pool.query(`
     const users = usersRows.map(userRow => ({
       ...userRow,
       created_at_str: formatDateTime(userRow.created_at),
-      last_login_str: u.last_login ? formatDateTime(userRow.last_login) : 'Never'
+      last_login_str: userRow.last_login ? formatDateTime(userRow.last_login) : 'Never'
     }));
 
     // Most recent login attempts from the audit table.
