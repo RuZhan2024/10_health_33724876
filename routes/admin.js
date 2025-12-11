@@ -123,13 +123,13 @@ router.post('/users/:id/role', requireAdmin, async (req, res) => {
 
   if (!['user', 'admin'].includes(newRole)) {
     req.flash('error', 'Invalid role value.');
-    return res.redirect('/admin');
+    return res.redirect('../../../admin');
   }
 
   // Prevent an admin from accidentally removing their own admin rights.
   if (String(targetUserId) === String(currentAdminId) && newRole !== 'admin') {
     req.flash('error', 'You cannot remove your own admin role.');
-    return res.redirect('/admin');
+    return res.redirect('../../../admin');
   }
 
   try {
@@ -143,7 +143,7 @@ router.post('/users/:id/role', requireAdmin, async (req, res) => {
     } else {
       req.flash('success', 'User role updated.');
     }
-    res.redirect('/admin');
+    res.redirect('../../../admin');
   } catch (err) {
     console.error(err);
     res.status(500).render('error_500');
@@ -160,7 +160,7 @@ router.post('/users/:id/toggle-active', requireAdmin, async (req, res) => {
   // Do not allow an admin to deactivate themselves.
   if (String(targetUserId) === String(currentAdminId)) {
     req.flash('error', 'You cannot deactivate your own account.');
-    return res.redirect('/admin');
+    return res.redirect('../../../admin');
   }
 
   try {
@@ -176,7 +176,7 @@ router.post('/users/:id/toggle-active', requireAdmin, async (req, res) => {
       req.flash('success', 'User activation status updated.');
     }
 
-    res.redirect('/admin');
+    res.redirect('../../../admin');
   } catch (err) {
     console.error(err);
     res.status(500).render('error_500');

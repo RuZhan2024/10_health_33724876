@@ -223,7 +223,7 @@ main {
   border: none;
   background: none;
   padding: 0;
-  margin: 0;
+  margin: 0 20px;
   color: var(--md-primary);
   cursor: pointer;
   font-size: 0.85rem;
