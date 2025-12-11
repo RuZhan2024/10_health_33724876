@@ -4,12 +4,12 @@ const app = require("../index");
 const dotenv = require("dotenv");
 dotenv.config();
 
-// Basic router / integration tests for the Health App.
+// Basic router/integration tests for the Health App.
 // These tests check that routes respond with the right status
 // and that protected routes redirect unauthenticated users.
 
 describe("Health App – router tests", function () {
-  // Allow a bit more time in case rendering / external calls are slow.
+  // Allow a bit more time in case rendering/external calls are slow.
   this.timeout(5000);
 
   // Home routes: public pages

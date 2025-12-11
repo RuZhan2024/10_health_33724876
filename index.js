@@ -53,8 +53,9 @@ const sessionStore = new MySQLStore({
 
 app.use(
   session({
-    key: "health_app_sid",
-    secret: process.env.SESSION_SECRET || "this_should_be_in_env",
+    key: process.env.SESSION_COOKIE_NAME || "health_app_sid",
+    //The secret should be in .env file. I put the secret here, so the app can be run without extra config
+    secret: process.env.SESSION_SECRET || "this_should_be_in_env", 
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
