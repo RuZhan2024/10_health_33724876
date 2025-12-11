@@ -182,8 +182,8 @@ The project also includes basic router tests using Supertest and Chai to check t
 ├─ _middleware.js           # requireLogin, requireAdmin, attachUserToLocals
 ├─ create_db.sql            # Database and tables
 ├─ insert_test_data.sql     # Seed data (admin, types, sample data)
-├─ app.test.js              # Router / integration tests
-├─ .env.example
+├─ test
+|  └─ app.test.js              # Router / integration tests
 ├─ package.json
 └─ README.md
 ````
