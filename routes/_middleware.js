@@ -5,7 +5,7 @@
 function requireLogin(req, res, next) {
   if (!req.session || !req.session.user) {
     req.flash('error', 'You must be logged in to view that page.');
-    return res.redirect('/auth/login');
+    return res.redirect('./auth/login');
   }
   next();
 }
@@ -17,7 +17,7 @@ function requireLogin(req, res, next) {
 function requireAdmin(req, res, next) {
   if (!req.session || !req.session.user) {
     req.flash('error', 'You must be logged in to view that page.');
-    return res.redirect('/auth/login');
+    return res.redirect('./auth/login');
   }
   if (req.session.user.role !== 'admin') {
     return res.status(403).render('error_403');
