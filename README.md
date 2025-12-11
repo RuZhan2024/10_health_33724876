@@ -163,8 +163,8 @@ The project also includes basic router tests using Supertest and Chai to check t
 │  ├─ error_500.ejs
 │  ├─ auth/
 │  │  ├─ login.ejs
-│  │  └─ register.ejs
-│  ├─ auth/delete_account.ejs
+│  │  ├─ register.ejs
+│  |  └─ auth/delete_account.ejs
 │  ├─ dashboard.ejs
 │  ├─ workouts/
 │  │  ├─ list.ejs
