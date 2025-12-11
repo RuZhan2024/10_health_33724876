@@ -164,7 +164,7 @@ The project also includes basic router tests using Supertest and Chai to check t
 │  ├─ auth/
 │  │  ├─ login.ejs
 │  │  ├─ register.ejs
-│  |  └─ auth/delete_account.ejs
+│  |  └─ delete_account.ejs
 │  ├─ dashboard.ejs
 │  ├─ workouts/
 │  │  ├─ list.ejs
