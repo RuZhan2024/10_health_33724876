@@ -394,7 +394,6 @@ app.use('/weather', weatherRoutes);
 4. Create `.env`:
 
    ```bash
-   cp .env.example .env
    # Edit .env to match your local MySQL user and add a SESSION_SECRET
    # Optionally add OPENWEATHER_API_KEY
    ```
