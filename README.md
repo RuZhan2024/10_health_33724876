@@ -290,29 +290,15 @@ Default admin user:
 
 
 ## 6. Environment variables
+The `.env` file is not committed to version control.
 
-If the application does not start because of missing environment variables, please create a .env file in the project root based on .env.example and fill in suitable values for:
+If the application does not start because of missing environment variables, please create a .env file in the project root:
 
 MySQL connection (`HEALTH_HOST`, `HEALTH_USER`, `HEALTH_PASSWORD`, `HEALTH_DATABASE`, `HEALTH_DB_PORT`)
 
 SESSION_SECRET (any non-empty string for local testing)
 
 OPENWEATHER_API_KEY (a valid key from OpenWeatherMap, or leave blank if you do not need the weather page)
-
-Steps:
-
-1. Copy the example file:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Edit `.env` to match your local MySQL user, choose a secure `SESSION_SECRET`, and add an `OPENWEATHER_API_KEY` if you want the weather feature to work fully.
-
-3. If `OPENWEATHER_API_KEY` is missing, the weather page still renders but shows a clear message that the API key is not configured.
-
-The `.env` file is not committed to version control.
-
 
 ## 7. Routes and middleware
 
